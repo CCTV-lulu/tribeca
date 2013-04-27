@@ -40,7 +40,7 @@ var app = {
 	        spook.append(el);
 
 	        el.transition({
-	        	rotateY: app.range(-15,15,true)+'deg',
+	        	rotateY: app.range(-20,20,true)+'deg',
 	        	scale: [0.6, 1],
 	        	translate: [0, 100]
 	        });
@@ -72,10 +72,17 @@ var app = {
 	                translate: [app.range(-2, 2), app.range(-6, 6)],
 	                duration: app.range(1000, 2000),
 	                easing: 'linear',
+	                '-webkit-filter': 'blur(' + app.range(0, 5) + 'px)',
 	                delay: 0,
 	                complete: function() {app.jitter(ref)}
 		   		});
 	    	})
+	    },
+
+	    spawn:function(text) {
+	    	var spawn = $('<div/>').addClass('make-spooky').html(text);
+	    	$('.container').append(spawn);
+	    	app.spookify(spawn);
 	    },
 
 
