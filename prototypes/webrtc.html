@@ -1,0 +1,37 @@
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<script type="text/javascript">
+var video = document.createElement('video');
+var canvas = document.createElement('canvas');
+document.body.appendChild(canvas);
+var ctx = canvas.getContext('2d');
+canvas.width = 800;
+canvas.height = 600;
+
+navigator.getUserMedia || (navigator.getUserMedia = navigator.mozGetUserMedia || navigator.webkitGetUserMedia || navigator.msGetUserMedia);
+navigator.getUserMedia({video: true}, function(stream) {
+    // console.log(arguments);
+    var source;
+    if (window.webkitURL) {
+      source = window.webkitURL.createObjectURL(stream);
+    } else {
+      source = stream; // Opera and Firefox
+    }
+    video.autoplay = true;
+    video.src = source;
+    document.body.appendChild(video);
+    draw();
+});
+
+function draw() {
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'rgb(0,0,0)';
+  ctx.fillRect(0, 0, 100, 100);
+  requestAnimationFrame(draw);
+}
+</script>
+</body>
+</html>
