@@ -1,2 +1,127 @@
 <!doctype html>
-<html></html>
+<html>
+  <head>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      svg, canvas {
+        display: block;
+        width: 800px;
+        height: 500px;
+        margin: 0 auto;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="scripts">
+      <script src="./third-party/zepto.js"></script>
+      <script src="./third-party/two.js"></script>
+      <script src="./third-party/physics.js"></script>
+      <script>
+
+        $(function() {
+
+          var two = new Two({ width: 800, height: 500 }).appendTo(document.body);
+          var gravity = 0.9;
+          var physics = new Physics(gravity);
+
+          two.$domElement = $(two.renderer.domElement);
+
+          var ground = two.makeRectangle(two.width / 2, two.height - 5, two.width, 10);
+          ground.depth = 10;
+          ground.noStroke();
+          ground.fill = 'brown';
+
+          var hero = two.makeRectangle(two.width / 2, two.height / 2, 20, 20);
+          hero.height = 20;
+          hero.particle = physics.makeParticle(1.0, two.width / 2, two.height / 2);
+          hero.particle.position = hero.translation;
+          hero.noStroke().fill = 'black';
+          hero.destination = new Two.Vector();
+          hero.jump = function() {
+            this.particle.velocity.y = -25;
+            return this;
+          };
+
+          ground.constraint = ground.translation.y - (ground.depth + hero.height) / 2;
+
+          var jumps = _.map(_.range(10), function(i) {
+            var x = Math.random() * two.width;
+            var y = two.height / 2 - i * 30;
+            return addJump(x, y);
+          });
+
+          var $window = $(window)
+            .bind('mousemove', function(e) {
+              var offset = two.$domElement.offset();
+              hero.destination.set(e.clientX - offset.left, e.clientY - offset.top);
+            })
+            .bind('mouseup', function(e) {
+              var particle = hero.particle;
+              var position = particle.position;
+              if (position.y >= ground.constraint) {
+                hero.jump();
+              }
+            });
+
+          physics
+            .onUpdate(function() {
+
+              var particle = hero.particle;
+              var position = particle.position;
+
+              position.y = Math.min(ground.constraint, position.y);
+              position.x += (hero.destination.x - position.x) * 0.125;
+
+              for (var i = 0; i < jumps.length; i++) {
+                var jump = jumps[i];
+                var within = jump.within(position);
+                if (within) {
+                  hero.jump();
+                  jumps.splice(i, 1);
+                  jump.remove();
+                  break;
+                }
+              }
+
+              focusHeight(position.y);
+
+              two.update();
+
+            })
+            .play();
+
+          function addJump(x, y, r) {
+
+            var radius = r || 10;
+
+            var circle = two.makeCircle(x, y, radius);
+            circle.within = function(v) {
+              var delta = circle.translation.distanceTo(v);
+              if (delta < radius) {
+                return true;
+              }
+              return false;
+            };
+
+            return circle;
+
+          }
+
+          function focusHeight(posY) {
+
+            var destination = posY - two.height / 2;
+            var scene = two.scene;
+            scene.translation.y = Math.max(-destination, 0);
+
+          }
+
+        });
+
+      </script>
+    </div>
+  </body>
+</html>
