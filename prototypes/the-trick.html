@@ -137,8 +137,7 @@
               position.y = Math.min(ground.constraint, position.y);
               position.x += (hero.destination.x - position.x) * 0.125;
 
-              for (var i = 0; i < jumps.length; i++) {
-                var jump = jumps[i];
+              _.each(jumps, function(jump, i) {
                 var dead = jump.update();
                 if (dead) {
                   jump.opacity -= jump.opacity * 0.125;
@@ -148,17 +147,13 @@
                       jump.opacity = 1.0;
                     });
                   }
-                  continue;
-                }
-                var within = jump.within(position);
-                if (within) {
+                } else if (jump.within(position)) {
+                  game.started = true;
                   hero.jump();
                   jump.explode();
-                  game.started = true;
-                  circleOfLife(i);
-                  break;
+                  circleOfLife(i); 
                 }
-              }
+              });
 
               focusHeight(position.y);
               calculateMultiplier();
@@ -182,7 +177,9 @@
           }
 
           function circleOfLife(i) {
-            jumps[i].translation.set(getHorizontal(), getVertical());
+            var x = getHorizontal();
+            var y = getVertical();
+            jumps[i].translation.set(x, y);
           }
 
           function addJump(x, y, r) {
