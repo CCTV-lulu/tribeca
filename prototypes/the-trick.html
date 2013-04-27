@@ -6,26 +6,38 @@
         margin: 0;
         padding: 0;
       }
-      svg, canvas {
+      #content {
+        position: relative;
         display: block;
         width: 800px;
         height: 500px;
         margin: 0 auto;
         overflow: hidden;
       }
+      #score {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
     </style>
   </head>
   <body>
+    <div id="content">
+      <div id="score">0</div>
+    </div>
     <div class="scripts">
-      <script src="./third-party/zepto.js"></script>
+      <script src="./third-party/jquery-2.0.0.min.js"></script>
       <script src="./third-party/two.js"></script>
       <script src="./third-party/physics.js"></script>
       <script>
 
         $(function() {
 
-          var two = new Two({ width: 800, height: 500 }).appendTo(document.body);
-          var gravity = 0.9;
+          var score = $('#score');
+          var multiplier = 1.0;
+
+          var two = new Two({ width: 800, height: 500 }).appendTo($('#content')[0]);
+          var gravity = 0.75;
           var physics = new Physics(gravity);
 
           two.$domElement = $(two.renderer.domElement);
@@ -43,14 +55,18 @@
           hero.destination = new Two.Vector();
           hero.jump = function() {
             this.particle.velocity.y = -25;
+            score.html(Math.round(parseInt(score.html()) + 10 * multiplier));
             return this;
           };
 
           ground.constraint = ground.translation.y - (ground.depth + hero.height) / 2;
 
-          var jumps = _.map(_.range(10), function(i) {
-            var x = Math.random() * two.width;
-            var y = two.height / 2 - i * 30;
+          var amount = 100;
+          var jumps = _.map(_.range(amount), function(i) {
+            var pct = i / amount;
+            var theta = pct * Math.PI * 2.0;
+            var x = two.width / 2 - Math.random() * two.width * 0.25;
+            var y = two.height / 2 - i * 250;
             return addJump(x, y);
           });
 
@@ -88,6 +104,7 @@
               }
 
               focusHeight(position.y);
+              calculateMultiplier();
 
               two.update();
 
@@ -96,9 +113,10 @@
 
           function addJump(x, y, r) {
 
-            var radius = r || 10;
+            var radius = r || 50;
 
             var circle = two.makeCircle(x, y, radius);
+            circle.noStroke().fill = 'lightblue';
             circle.within = function(v) {
               var delta = circle.translation.distanceTo(v);
               if (delta < radius) {
@@ -114,9 +132,16 @@
           function focusHeight(posY) {
 
             var destination = posY - two.height / 2;
-            var scene = two.scene;
-            scene.translation.y = Math.max(-destination, 0);
+            two.scene.translation.y += (- destination - two.scene.translation.y) * 0.125;
+            two.scene.translation.y = Math.max(two.scene.translation.y, 0);
 
+          }
+
+          function calculateMultiplier() {
+            multiplier += 1 / 60;
+            if (hero.translation.y >= ground.constraint) {
+              multiplier = 1.0;
+            }
           }
 
         });
