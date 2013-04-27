@@ -19,11 +19,27 @@
         top: 0;
         left: 0;
       }
+      #stats {
+        position: absolute;
+        display: none;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.66);
+      }
     </style>
   </head>
   <body>
     <div id="content">
       <div id="score">0</div>
+      <div id="stats">
+        <div>
+          <div class="highscore"></div>
+          <div class="score"></div>
+          <button>Play Again</button>
+        </div>
+      </div>
     </div>
     <div class="scripts">
       <script src="./third-party/jquery-2.0.0.min.js"></script>
@@ -33,8 +49,14 @@
 
         $(function() {
 
+          var game = {
+            started: false,
+            ended: false,
+            highscore: 0
+          };
           var score = $('#score');
           var multiplier = 1.0;
+          $('#stats button').click(reset);
 
           var two = new Two({ width: 800, height: 500 }).appendTo($('#content')[0]);
           var gravity = 0.75;
@@ -47,27 +69,25 @@
           ground.noStroke();
           ground.fill = 'brown';
 
-          var hero = two.makeRectangle(two.width / 2, two.height / 2, 20, 20);
+          var hero = two.makeRectangle(two.width / 2, two.height, 20, 20);
           hero.height = 20;
           hero.particle = physics.makeParticle(1.0, two.width / 2, two.height / 2);
           hero.particle.position = hero.translation;
           hero.noStroke().fill = 'black';
           hero.destination = new Two.Vector();
           hero.jump = function() {
-            this.particle.velocity.y = -25;
+            this.particle.velocity.y = -20;
             score.html(Math.round(parseInt(score.html()) + 10 * multiplier));
             return this;
           };
 
           ground.constraint = ground.translation.y - (ground.depth + hero.height) / 2;
 
-          var amount = 100;
-          var jumps = _.map(_.range(amount), function(i) {
-            var pct = i / amount;
-            var theta = pct * Math.PI * 2.0;
-            var x = two.width / 2 - Math.random() * two.width * 0.25;
-            var y = two.height / 2 - i * 250;
-            return addJump(x, y);
+          var amount = 25;
+          var summit = 0;
+          var verticalIncrement = 250;
+          var jumps = window.jumps = _.map(_.range(amount), function(i) {
+            return addJump(getHorizontal(), getVertical());
           });
 
           var $window = $(window)
@@ -76,6 +96,9 @@
               hero.destination.set(e.clientX - offset.left, e.clientY - offset.top);
             })
             .bind('mouseup', function(e) {
+              if (game.ended) {
+                return;
+              }
               var particle = hero.particle;
               var position = particle.position;
               if (position.y >= ground.constraint) {
@@ -86,6 +109,8 @@
           physics
             .onUpdate(function() {
 
+              summit ++;
+
               var particle = hero.particle;
               var position = particle.position;
 
@@ -94,11 +119,16 @@
 
               for (var i = 0; i < jumps.length; i++) {
                 var jump = jumps[i];
+                var dead = jump.update();
+                if (dead) {
+                  circleOfLife(i);
+                  continue;
+                }
                 var within = jump.within(position);
                 if (within) {
                   hero.jump();
-                  jumps.splice(i, 1);
-                  jump.remove();
+                  game.started = true;
+                  circleOfLife(i);
                   break;
                 }
               }
@@ -111,12 +141,34 @@
             })
             .play();
 
+          function getHorizontal() {
+            return two.width / 2 - Math.random() * two.width * 0.33;
+          }
+
+          function getVertical() {
+            summit -= verticalIncrement * Math.random();
+            return summit;
+          }
+
+          function circleOfLife(i) {
+            jumps[i].translation.set(getHorizontal(), getVertical());
+          }
+
           function addJump(x, y, r) {
 
             var radius = r || 50;
+            var diameter = radius * 2;
+            var offset = diameter * 1.5;
 
             var circle = two.makeCircle(x, y, radius);
             circle.noStroke().fill = 'lightblue';
+            circle.update = function() {
+              circle.translation.y += 1;
+              if (circle.translation.y >= ground.constraint - offset) {
+                return true;
+              }
+              return false;
+            };
             circle.within = function(v) {
               var delta = circle.translation.distanceTo(v);
               if (delta < radius) {
@@ -132,8 +184,7 @@
           function focusHeight(posY) {
 
             var destination = posY - two.height / 2;
-            two.scene.translation.y += (- destination - two.scene.translation.y) * 0.125;
-            two.scene.translation.y = Math.max(two.scene.translation.y, 0);
+            two.scene.translation.y = Math.max(-destination, 0);
 
           }
 
@@ -141,7 +192,26 @@
             multiplier += 1 / 60;
             if (hero.translation.y >= ground.constraint) {
               multiplier = 1.0;
+              if (game.started) {
+                endGame();
+              }
             }
+          }
+
+          function reset() {
+            game.started = false;
+            game.ended = false;
+            score.html(0);
+            $('#stats').fadeOut();
+          }
+
+          function endGame() {
+            game.highscore = Math.max(game.highscore, parseInt(score.html()));
+            var $stats = $('#stats');
+            $stats.find('.highscore').html(game.highscore);
+            $stats.find('.score').html(score.html());
+            $stats.fadeIn();
+            game.ended = true;
           }
 
         });
