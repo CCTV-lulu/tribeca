@@ -200,6 +200,7 @@
               return particle;
             });
 
+            var k = 0.0125;
             var tween = new TWEEN.Tween()
               .to({}, 350)
               .easing(TWEEN.Easing.Circular.Out)
@@ -217,7 +218,7 @@
                   var x = amplitude * Math.cos(theta) + p.origin.x;
                   var y = amplitude * Math.sin(theta) + p.origin.y;
                   p.translation.set(x, y);
-                  // p.opacity = 1 - t;
+                  p.opacity = 1 - (k * t) / (k - t + 1);
                 });
               })
               .onComplete(function() {
