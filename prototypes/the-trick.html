@@ -1,57 +1,111 @@
 <!doctype html>
 <html>
   <head>
+    <meta charset="utf-8">
+    <title>Death Curse</title>
     <style>
       * {
         margin: 0;
         padding: 0;
       }
-      svg, canvas {
-        display: block;
+      #content {
+        position: relative;
+        display: none;
         width: 800px;
         height: 500px;
         margin: 0 auto;
         overflow: hidden;
       }
+      #score {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+        width: 100%;
+      }
+      #stats {
+        position: absolute;
+        display: none;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.66);
+        z-index: 9999;
+      }
     </style>
   </head>
   <body>
+    <div id="content">
+      <div id="score">0</div>
+      <div id="stats">
+        <div>
+          <div class="highscore"></div>
+          <div class="score"></div>
+          <button>Play Again</button>
+        </div>
+      </div>
+    </div>
     <div class="scripts">
-      <script src="./third-party/zepto.js"></script>
+      <script src="./third-party/jquery-2.0.0.min.js"></script>
       <script src="./third-party/two.js"></script>
       <script src="./third-party/physics.js"></script>
+      <script src="./third-party/tween.js"></script>
+      <script src="./third-party/mersenne-twister.js"></script>
       <script>
 
         $(function() {
 
-          var two = new Two({ width: 800, height: 500 }).appendTo(document.body);
-          var gravity = 0.9;
+          var M = new MersenneTwister();
+
+          var game = {
+            started: false,
+            ended: false,
+            highscore: 0
+          };
+          var score = $('#score');
+          var multiplier = 1.0;
+          $('#stats button').click(reset);
+          var _endGame = _.once(endGame);
+
+          var two = new Two({
+            width: 800,
+            height: 500,
+            type: Two.Types.canvas
+          }).appendTo($('#content')[0]);
+          var gravity = 0.75;
           var physics = new Physics(gravity);
 
           two.$domElement = $(two.renderer.domElement);
 
-          var ground = two.makeRectangle(two.width / 2, two.height - 5, two.width, 10);
-          ground.depth = 10;
+          var groundDepth = 50;
+          var ground = two.makeRectangle(two.width / 2, two.height - 5, two.width, groundDepth);
+          ground.depth = groundDepth;
           ground.noStroke();
           ground.fill = 'brown';
 
-          var hero = two.makeRectangle(two.width / 2, two.height / 2, 20, 20);
-          hero.height = 20;
+          var heroHeight = 20;
+          var hero = two.makeRectangle(two.width / 2, two.height, heroHeight, heroHeight);
+          hero.height = heroHeight;
           hero.particle = physics.makeParticle(1.0, two.width / 2, two.height / 2);
           hero.particle.position = hero.translation;
           hero.noStroke().fill = 'black';
           hero.destination = new Two.Vector();
           hero.jump = function() {
-            this.particle.velocity.y = -25;
+            this.particle.velocity.y = - heroHeight;
+            if (game.started) {
+              score.html(Math.round(parseInt(score.html()) + 10 * multiplier));
+            }
             return this;
           };
 
           ground.constraint = ground.translation.y - (ground.depth + hero.height) / 2;
 
-          var jumps = _.map(_.range(10), function(i) {
-            var x = Math.random() * two.width;
-            var y = two.height / 2 - i * 30;
-            return addJump(x, y);
+          var amount = 25;
+          var summit = 0;
+          var verticalIncrement = 250;
+          var jumps = window.jumps = _.map(_.range(amount), function(i) {
+            return addJump(getHorizontal(), getVertical());
           });
 
           var $window = $(window)
@@ -60,6 +114,9 @@
               hero.destination.set(e.clientX - offset.left, e.clientY - offset.top);
             })
             .bind('mouseup', function(e) {
+              if (game.ended) {
+                return;
+              }
               var particle = hero.particle;
               var position = particle.position;
               if (position.y >= ground.constraint) {
@@ -70,41 +127,130 @@
           physics
             .onUpdate(function() {
 
+              TWEEN.update();
+
+              summit++;
+
               var particle = hero.particle;
               var position = particle.position;
 
               position.y = Math.min(ground.constraint, position.y);
               position.x += (hero.destination.x - position.x) * 0.125;
 
-              for (var i = 0; i < jumps.length; i++) {
-                var jump = jumps[i];
-                var within = jump.within(position);
-                if (within) {
+              _.each(jumps, function(jump, i) {
+                var dead = jump.update();
+                if (dead) {
+                  jump.opacity -= jump.opacity * 0.125;
+                  if (jump.opacity < 0.01) {
+                    circleOfLife(i);
+                    _.defer(function() {
+                      jump.opacity = 1.0;
+                    });
+                  }
+                } else if (jump.within(position)) {
+                  game.started = true;
                   hero.jump();
-                  jumps.splice(i, 1);
-                  jump.remove();
-                  break;
+                  jump.explode();
+                  circleOfLife(i); 
                 }
-              }
+              });
 
               focusHeight(position.y);
+              calculateMultiplier();
 
               two.update();
 
             })
             .play();
 
+          _.defer(function() {
+            $('#content').fadeIn();
+          });
+
+          function getHorizontal() {
+            return two.width / 2 - (M.random() * two.width * 0.66 - two.width * 0.33);
+          }
+
+          function getVertical() {
+            summit -= verticalIncrement * M.random();
+            return summit;
+          }
+
+          function circleOfLife(i) {
+            var x = getHorizontal();
+            var y = getVertical();
+            jumps[i].translation.set(x, y);
+          }
+
           function addJump(x, y, r) {
 
-            var radius = r || 10;
+            var color = 'lightblue';
+            var radius = r || 50;
+            var diameter = radius * 2;
+            var offset = diameter * 1.5;
+            var callback = _.identity;
 
             var circle = two.makeCircle(x, y, radius);
+            circle.noStroke().fill = color;
+
+            var amount = 8;
+            var particles = _.map(_.range(amount), function(i) {
+              
+              var particle = two.makeCircle(0, 0, radius / (amount / 2));
+              particle.visible = false;
+              particle.noStroke().fill = color;
+              particle.origin = new Two.Vector(x, y);
+              return particle;
+            });
+
+            var k = 0.0125;
+            var tween = new TWEEN.Tween()
+              .to({}, 350)
+              .easing(TWEEN.Easing.Circular.Out)
+              .onStart(function() {
+                _.each(particles, function(p) {
+                  p.visible = true;
+                  p.origin.copy(hero.translation);
+                });
+              })
+              .onUpdate(function(t) {
+                var amplitude = t * offset;
+                _.each(particles, function(p, i) {
+                  var pct = (i + 1) / amount;
+                  var theta = Math.PI * 2 * pct;
+                  var x = amplitude * Math.cos(theta) + p.origin.x;
+                  var y = amplitude * Math.sin(theta) + p.origin.y;
+                  p.translation.set(x, y);
+                  p.opacity = 1 - (k * t) / (k - t + 1);
+                });
+              })
+              .onComplete(function() {
+                _.each(particles, function(p) {
+                  p.translation.clear();
+                  p.visible = false;
+                });
+                callback();
+              })
+
+            circle.update = function() {
+              circle.translation.y += 1;
+              if (circle.translation.y >= ground.constraint - offset) {
+                return true;
+              }
+              return false;
+            };
             circle.within = function(v) {
               var delta = circle.translation.distanceTo(v);
               if (delta < radius) {
                 return true;
               }
               return false;
+            };
+            circle.explode = function(c) {
+              if (_.isFunction(c)) {
+                callback = c;
+              }
+              tween.start();
             };
 
             return circle;
@@ -114,9 +260,45 @@
           function focusHeight(posY) {
 
             var destination = posY - two.height / 2;
-            var scene = two.scene;
-            scene.translation.y = Math.max(-destination, 0);
+            var ty = two.scene.translation.y;
+            if (game.ended || Math.abs(Math.abs(ty) - Math.abs(destination)) > two.height / 4) {
+              var dest = Math.max(-destination, 0);
+              two.scene.translation.y += (dest - ty) * 0.0625;
+            }
 
+          }
+
+          function calculateMultiplier() {
+            multiplier += 1 / 60;
+            if (hero.translation.y >= ground.constraint) {
+              multiplier = 1.0;
+              if (game.started) {
+                _endGame();
+              }
+            }
+          }
+
+          function reset() {
+            game.started = false;
+            game.ended = false;
+            score.html(0);
+            $('#stats').fadeOut();
+            _endGame = _.once(endGame);
+            summit = 0;
+            _.each(jumps, function(j, i) {
+              if (j.translation.y < 0) {
+                circleOfLife(i);
+              }
+            });
+          }
+
+          function endGame() {
+            game.highscore = Math.max(game.highscore, parseInt(score.html()));
+            var $stats = $('#stats');
+            $stats.find('.highscore').html(game.highscore);
+            $stats.find('.score').html(score.html());
+            $stats.fadeIn();
+            game.ended = true;
           }
 
         });
