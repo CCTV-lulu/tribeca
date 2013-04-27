@@ -1,6 +1,8 @@
 <!doctype html>
 <html>
   <head>
+    <meta charset="utf-8">
+    <title>Death Curse</title>
     <style>
       * {
         margin: 0;
@@ -8,7 +10,7 @@
       }
       #content {
         position: relative;
-        display: block;
+        display: none;
         width: 800px;
         height: 500px;
         margin: 0 auto;
@@ -166,6 +168,10 @@
             })
             .play();
 
+          _.defer(function() {
+            $('#content').fadeIn();
+          });
+
           function getHorizontal() {
             return two.width / 2 - (M.random() * two.width * 0.66 - two.width * 0.33);
           }
@@ -283,7 +289,7 @@
             _endGame = _.once(endGame);
             summit = 0;
             _.each(jumps, function(j, i) {
-              if (jump.translation.y < 0) {
+              if (j.translation.y < 0) {
                 circleOfLife(i);
               }
             });
