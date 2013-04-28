@@ -86,8 +86,8 @@ angular.module('clientApp')
       hyperlapse.onAnimate = function() {
         timeNow = new Date().getTime()/1000;
         material.uniforms.time.value = timeNow - timeStart;
-        var dark = (timeNow - timeStart)/timeToDie;
-        material.uniforms.darkness.value = dark*2;
+        var dark = (timeNow - timeStart) / timeToDie;
+        material.uniforms.darkness.value = dark * 2;
       };
 
       pano.addEventListener('mousemove', function(e){
