@@ -122,7 +122,7 @@ angular.module('clientApp')
       document.addEventListener( 'keydown', onKeyDown, false );
       function onKeyDown ( event ) {
         var key = event.keyCode;
-        console.log(key)
+        // console.log(key)
         if (key == 190 || key == 38 || key == 39 || key == 87 || key == 68 || key == 32) /* > */
           $rootScope.hyperlapse.next();
         if (key == 188 || key == 37 || key == 40 || key == 83 || key == 65 || key == 8) /* < */
