@@ -4,14 +4,12 @@ angular.module('clientApp')
   .factory('hyperlapse', function($rootScope) {
   
   var init = function() {
-    navigator.geolocation.getCurrentPosition( function(position){
-      $rootScope.position = position;
-      console.log($rootScope.position);
-      getDestination();
-    }, alert );
+    // $rootScope.position = POSITION;
+    getDestination();
   };
 
   var getDestination = function() {
+    console.log('looking for destination');
     $rootScope.start_point = new google.maps.LatLng( $rootScope.position.coords.latitude, $rootScope.position.coords.longitude );
     $rootScope.map = new google.maps.Map(document.createElement("div"), {
       mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -34,6 +32,7 @@ angular.module('clientApp')
       if (status == google.maps.places.PlacesServiceStatus.OK) {
         $rootScope.end_point = results[0].geometry.location;
         //initHyperlapse();
+        console.log("end_point set");
       } else {
         alert("can't find route");
       }

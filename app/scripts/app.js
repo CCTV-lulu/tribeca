@@ -12,7 +12,6 @@ angular.module('clientApp', [])
         return d.promise;
       }]
     };
-
     $routeProvider
       .when('/', {
         templateUrl: 'views/main.html',
@@ -55,5 +54,9 @@ angular.module('clientApp', [])
     $rootScope.$on('$routeChangeStart', function() {
       $('.container').css('opacity', 0);
     });
-    hyperlapse.init();
+    navigator.geolocation.getCurrentPosition( function(position){
+      $rootScope.position = position;
+      console.log($rootScope.position);
+      hyperlapse.init();
+    }, alert );
   });
