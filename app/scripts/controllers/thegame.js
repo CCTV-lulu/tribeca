@@ -11,6 +11,16 @@ angular.module('clientApp')
 
     console.log('game starting');
 
+    var initialized = false;
+
+    // init audio
+    var darksounds = [$('#feeding-loop')[0]];
+    var lightsounds = [];
+
+    $.each(darksounds, function(i, v) {
+      v.play();
+    });
+
     function initHyperlapse() {
 
       /* Hyperlapse */
@@ -126,6 +136,19 @@ angular.module('clientApp')
 
     }
 
-    initHyperlapse();
+    var start = function() {
+      setTimeout(
+        function(){
+          if (!$rootScope.PANOREADY) {
+            start();
+          } else {
+            initHyperlapse();
+          };
+        }, 1000
+      )
+    };
+
+    start();
+
 
   });

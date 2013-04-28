@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('clientApp')
-  .controller('HappywolfyfuntimeandrainbowCtrl', function ($scope, $location) {
+  .controller('HappywolfyfuntimeandrainbowCtrl', function ($scope, $rootScope, $location) {
 
         var moon, wolf, star, standing_wolf, grass_flat;
         var BONUS = 1000;
@@ -36,10 +36,15 @@ angular.module('clientApp')
 
         });
 
+        $('.preload-lupin').delay(2000).animate({opacity:0}, 2000, function(){$(this).hide();})
+
         var physics;
         var offered = false;
 
         function init() {
+
+
+        
 
           var M = new MersenneTwister();
 
@@ -369,8 +374,10 @@ angular.module('clientApp')
           function updateScore() {
           	var points = Math.round(parseInt(score.html()) + 10 * multiplier);
             score.html(points);
-            if (!offered && points > BONUS) {
+            if (!offered && $rootScope.PANOREADY) {
+            // if (!offered && points > BONUS && $rootScope.PANOREADY) {
             	theoffer();
+              console.log('ogger');
             	offered = true;
             }
           }
