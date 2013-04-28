@@ -16,7 +16,6 @@ this.loadBuffer(this.urlList[i],i);}
 
     $rootScope.timeStart = new Date().getTime()/1000;
     $rootScope.timeNow = new Date().getTime()/1000;
-    $rootScope.timeToDie = 180;
     $rootScope.CINEMATIC = false;
 
     console.log('game starting');
@@ -27,7 +26,12 @@ this.loadBuffer(this.urlList[i],i);}
     var ctx = new webkitAudioContext();
     var darkgain = ctx.createGainNode();
     var darksounds = new BufferLoader(ctx, [
-      'audio/gore/160975__vosvoy__ragingzombie-feeding-loop.mp3'
+      'audio/gore/160975__vosvoy__ragingzombie-feeding-loop.mp3',
+      // 'audio/gore/132106__sironboy__woman-scream.mp3',
+      'audio/gore/35494__co3__horror-ambient-clean.mp3',
+      'audio/gore/49128__aesqe__monster-growl-02.mp3',
+      'audio/gore/104039__rutgermuller__scream-owowo-1.mp3',
+      'audio/gore/169813__missozzy__curse-02.mp3'
       ], function(list) {
         $.each(list, function(i, b) {
           var s = ctx.createBufferSource();
@@ -128,6 +132,29 @@ this.loadBuffer(this.urlList[i],i);}
       var bobHeight = 20;
       var inc = 0;
 
+      function playSounds(ids, callback)  {
+        if (ids.length == 0) {
+          callback();
+          return;
+        }
+        var storyCurrentId = ids.shift();
+         var $story = $('#story-'+storyCurrentId)
+         var story = $story[0];
+          console.log('story', story)
+          story.play();
+          $story.on("ended", function(){
+            console.log('end');
+            playSounds(ids, callback);
+          });
+      }
+
+      $rootScope.CINEMATIC = true;
+      var ids = audioMap.start['0'].sounds;
+      playSounds(ids, function() {
+        $rootScope.CINEMATIC = false;
+      });
+
+
       function loop() {
 
         if (cancelTimer && $rootScope.hyperlapse.camera) {
@@ -138,8 +165,15 @@ this.loadBuffer(this.urlList[i],i);}
           inc += 0.04;
         }
 
-        requestAnimationFrame(loop);
 
+        if ($rootScope.CINEMATIC == false) {
+          var l = $rootScope.progress;
+          var d = $rootScope.darkness;
+
+        }
+
+
+        requestAnimationFrame(loop);
       }
 
       loop();
@@ -173,7 +207,42 @@ this.loadBuffer(this.urlList[i],i);}
           };
         }, 200
       )
+
     };
+
+    var storyCurrentId = 1;
+    var played = [];
+
+    var audioMap = {
+      'start': {
+        '0': {
+          sounds: [1,2,3,4,5,6,7,8,9,10]
+        },
+      },
+      'light': {
+        '.5': {
+          sounds: []
+        },
+        '.75': {
+          sounds: []
+        },
+        '1': {
+          sounds: []
+        }
+      },
+      'dark': {
+        '.5': {
+          sounds: []
+        },
+        '.75': {
+          sounds: []
+        },
+        '1': {
+          sounds: []
+        }
+      },
+    }
+    
 
     start();
 

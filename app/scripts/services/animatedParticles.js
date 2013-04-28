@@ -8,7 +8,7 @@ angular.module('clientApp')
       { path: './images/bats.png', offset: 1 / 14, limit: 14 }
     ];
 
-    var amount = 5, sprites, materials, scene;
+    var amount = 100, sprites, materials, scene;
     var frameCount = 0;
 
     return {
@@ -38,14 +38,16 @@ angular.module('clientApp')
           material = material.clone();
           // material.opacity = Math.random();
           material.uvScale.set(1, imageOptions.offset);
-          material.uvOffset.set(0, 0);
+          material.uvOffset.set(0, imageOptions.offset * Math.floor(Math.random() * imageOptions.limit));
           var sprite = new THREE.Sprite(material);
           sprite.imageOptions = imageOptions;
           scene.add(sprite);
-          sprite.position.set(0, Math.random() * 1000 - 500, Math.random() * 1000 - 500);
-          var size = Math.sqrt(Math.random()) * 100;
+          sprite.position.set(- Math.random() * 1000, Math.random() * 1000 - 500, Math.random() * 1000 - 500);
+          // var size = Math.sqrt(Math.random()) * 100;
+          var size = 20;
+          sprite.rotation.y = Math.random() * Math.PI;
           sprite.scale.set(size, size, 1);
-          sprite.velocity = 10;
+          sprite.velocity = 10 * Math.random() + 10;
           return sprite;
         });
 
@@ -59,14 +61,14 @@ angular.module('clientApp')
 
         _.each(sprites, function(s) {
           var p = s.position.x;
-          if (p > 1000 || p < 0) {
-            s.position.x = 1000;
+          if (p > 1000 || p < -1000) {
+            s.position.x = -1000;
           }
           s.position.x += s.velocity;
-          // s.opacity = p / 1000;
+          s.opacity = Math.min(p / 500, 1);
         });
 
-        if ((frameCount % (60 / 12))) {
+        if ((frameCount % (60 / 30))) {
           return;
         }
 

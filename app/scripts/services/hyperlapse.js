@@ -109,7 +109,7 @@ angular.module('clientApp')
 
     $rootScope.timeStart = new Date().getTime()/1000;
     $rootScope.timeNow = new Date().getTime()/1000;
-    $rootScope.timeToDie = 60;
+    $rootScope.timeToDie = 180;
 
     $rootScope.hyperlapse.onAnimate = function() {
       $rootScope.timeNow = new Date().getTime()/1000;
