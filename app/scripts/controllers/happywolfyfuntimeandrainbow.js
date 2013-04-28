@@ -3,12 +3,12 @@
 angular.module('clientApp')
   .controller('HappywolfyfuntimeandrainbowCtrl', function ($scope, $location) {
 
-        var moon, wolf, star;
+        var moon, wolf, star, standing_wolf;
         var BONUS = 1000;
 
         $(function() {
 
-          var _init = _.after(3, init);
+          var _init = _.after(4, init);
 
           moon = document.createElement('img');
           $(moon).bind('load', _init);
@@ -21,6 +21,10 @@ angular.module('clientApp')
           wolf = document.createElement('img');
           $(wolf).bind('load', _init);
           wolf.src = './images/wolf.png';
+
+          standing_wolf = document.createElement('img');
+          $(wolf).bind('load', _init);
+          wolf.src = './images/holdstill.png';
 
         });
 
@@ -149,7 +153,8 @@ angular.module('clientApp')
               if (Math.abs(delta) > 0.1) {
                 run(isLeft);
               } else {
-                stand();
+                run(isLeft, true)
+                // stand();
               }
 
               _.each(jumps, function(jump, i) {
@@ -187,10 +192,16 @@ angular.module('clientApp')
             updateFrame();
           }
 
-          function run(isLeft) {
+          function run(isLeft, standing) {
             // Flip the stance
             if (!_.isUndefined(isLeft)) {
               hero.reflectY = !isLeft;
+            }
+            if (!!standing && hero.image !== standing_wolf) {
+              hero.image = standing_wolf;
+            }
+            if (!standing && hero.image !== wolf) {
+              hero.image = wolf;
             }
             frame = (frame + 0.5) % frameCount;
             updateFrame();
