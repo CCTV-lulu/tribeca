@@ -371,9 +371,10 @@ angular.module('clientApp')
         	$scope.offer = true;
         	$scope.$apply();
         	$('#content').css('-webkit-filter', 'blur(10px)');
+        	spooky
         }
 
-        // $scope.offer = true;
+        $scope.offer = true;
         // $scope.$apply();
 
         $scope.agree = function() {

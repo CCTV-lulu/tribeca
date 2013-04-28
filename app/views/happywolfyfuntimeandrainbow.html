@@ -1,5 +1,22 @@
     <style>
 
+      @-webkit-keyframes pulse {
+        0%   { background: rgba(150, 0, 0, 0.66); }
+        100% { background: rgba(150, 0, 0, 1.0); }
+      }
+      @-moz-keyframes pulse {
+        0%   { background: rgba(150, 0, 0, 0.66); }
+        100% { background: rgba(150, 0, 0, 1.0); }
+      }
+      @-o-keyframes pulse {
+        0%   { background: rgba(150, 0, 0, 0.66); }
+        100% { background: rgba(150, 0, 0, 1.0); }
+      }
+      @keyframes pulse {
+        0%   { background: rgba(150, 0, 0, 0.66); }
+        100% { background: rgba(150, 0, 0, 1.0); }
+      }
+
       @font-face {
           font-family: 'populaireregular';
           src: url('fonts/populaire-webfont.eot');
@@ -115,7 +132,13 @@
         z-index: 9999;
       }
       #offer .wrapper {
-        background: rgba(0, 0, 0, 0.5);
+/*        background: rgba(255, 0, 0, 0.66);*/
+        -webkit-animation: pulse 2s infinite; /* Safari 4+ */
+        -moz-animation:    pulse 2s infinite; /* Fx 5+ */
+        -o-animation:      pulse 2s infinite; /* Opera 12+ */
+        animation:         pulse 2s infinite; /* IE 10+ */
+        -webkit-animation-direction: alternate;
+        animation-direction: alternate;
       }
       #offer .wrapper > div {
         position: absolute;
@@ -142,9 +165,9 @@
       <div class="wrapper">
         <div>
           Wanna play a real game?<br />
-          <button ng-click="agree()">Agree</button>
+          <spooky ng-click="agree()">Agree</spooky>
         	&nbsp;
-        	<button ng-click="disagree()">Keep Playing</button>
+        	<spooky ng-click="disagree()">Keep Playing</spooky>
         </div>
       </div>
     </div>
