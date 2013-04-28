@@ -44,10 +44,15 @@ angular.module('clientApp')
 
         });
 
+        $('.preload-lupin').delay(2000).animate({opacity:0}, 2000, function(){$(this).hide();})
+
         var physics;
         var offered = false;
 
         function init() {
+
+
+        
 
           var M = new MersenneTwister();
 
