@@ -33,10 +33,99 @@ angular.module('clientApp')
         $rootScope.end_point = results[0].geometry.location;
         //initHyperlapse();
         console.log("end_point set");
+        createHyperlapse();
       } else {
         alert("can't find route");
       }
     }
+
+  var createHyperlapse = function() {
+
+    console.log('creating hyperlapse');
+
+    var lutTexture = THREE.ImageUtils.loadTexture( "images/LUT1.png" );
+    lutTexture.magFilter = THREE.NearestFilter;
+    lutTexture.minFilter = THREE.NearestFilter;
+    lutTexture.m
+    var uniforms = {
+        map: { type: "t", value: null },
+        LUT: { type: "t", value: lutTexture },
+        progress: { type: "f", value: null},
+        lightness: { type: "f", value: 0},
+        darkness: { type: "f", value: 0},
+        time: { type: "f", value: 0}
+    };
+
+    $rootScope.material = new THREE.ShaderMaterial( {
+
+        uniforms: uniforms,
+        vertexShader: document.getElementById( 'vertexShader' ).textContent,
+        fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+
+      } );
+
+    $rootScope.pano = document.getElementById('pano');
+
+    $rootScope.hyperlapse = new Hyperlapse($rootScope.pano, {
+      lookat: $rootScope.end_point,
+      fov: 100,
+      millis: 50,
+      width: window.innerWidth,
+      height: window.innerHeight,
+      zoom: 2,
+      use_lookat: false,
+      distance_between_points: 2,
+      max_points: 10,
+      material: $rootScope.material
+    });
+
+    $rootScope.hyperlapse.onRouteComplete = function(e) {
+      $rootScope.hyperlapse.load();
+      $rootScope.pano.style.display = 'none';
+    };
+
+    $rootScope.hyperlapse.onError = function(e) {
+      console.log( "ERROR: "+ e.message );
+    };
+
+    $rootScope.hyperlapse.onFrame = function(e) {
+      var progress = (e.position+1)/$rootScope.hyperlapse.length();
+      $rootScope.material.uniforms.progress.value = progress;
+      $rootScope.material.uniforms.lightness.value = progress/2;
+    };
+
+    $rootScope.timeStart = new Date().getTime()/1000;
+    $rootScope.timeNow = new Date().getTime()/1000;
+    $rootScope.timeToDie = 60;
+
+    $rootScope.hyperlapse.onAnimate = function() {
+      $rootScope.timeNow = new Date().getTime()/1000;
+      $rootScope.material.uniforms.time.value = $rootScope.timeNow - $rootScope.timeStart;
+      var dark = ($rootScope.timeNow - $rootScope.timeStart)/$rootScope.timeToDie;
+      $rootScope.material.uniforms.darkness.value = dark*2;
+    };
+
+    var directions_service = new google.maps.DirectionsService();
+
+    var generate = function(){
+      var request = {
+        origin: $rootScope.start_point, 
+        destination: $rootScope.end_point, 
+        travelMode: google.maps.DirectionsTravelMode.DRIVING
+      };
+
+      directions_service.route(request, function(response, status) {
+        if (status == google.maps.DirectionsStatus.OK) {   
+          $rootScope.hyperlapse.generate({route: response});
+        } else {
+          console.log(status);
+        }
+      })
+    };
+
+    generate();
+
+  }
 
   return {
     init: init,
