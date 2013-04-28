@@ -26,10 +26,11 @@
 		var start_point, end_point, lookat_point;
 
 		var ma, directions_service, streetview_service;
-		var cancelTimer = false;
+		var ready = false, timeout = 1000 / 12, progress = 0;
 
 		var timeStart = new Date().getTime()/1000;
-		var timeToDie = 30;
+		var timeNow = new Date().getTime()/1000;
+		var timeToDie = 60;
 
 		function getLocation() {
 			navigator.geolocation.getCurrentPosition( getDestination, alert );
@@ -93,7 +94,8 @@
 			var pano = document.getElementById('pano');
 			var is_moving = false;
 			var px, py;
-			var onPointerDownPointerX = 0, onPointerDownPointerY = 0;
+      var onPointerDownPointerX = 0, onPointerDownPointerY = 0;
+      var offset = { x: 0, y: 0 };
 
 			var hyperlapse = new Hyperlapse(pano, {
 				lookat: lookat_point,
@@ -104,7 +106,7 @@
 				zoom: 2,
 				use_lookat: false,
 				distance_between_points: 2,
-				max_points: 10,
+				max_points: 100,
 				material: material
 			});
 			
@@ -118,86 +120,145 @@
 			};
 
 			hyperlapse.onLoadComplete = function(e) {
-          // hyperlapse.play();
+        ready = true;
+        timeStart = new Date().getTime()/1000;
 			};
 
 			hyperlapse.onFrame = function(e) {
-				var progress = (e.position+1)/hyperlapse.length();
+				progress = (e.position+1)/hyperlapse.length();
 				material.uniforms.progress.value = progress;
-				material.uniforms.lightness.value = progress;
+				material.uniforms.lightness.value = progress/2;
 			};
 
 			hyperlapse.onAnimate = function() {
-				var timeNow = new Date().getTime()/1000;
+				timeNow = new Date().getTime()/1000;
 				material.uniforms.time.value = timeNow - timeStart;
-				material.uniforms.darkness.value = (timeNow - timeStart)/timeToDie;
+				var dark = (timeNow - timeStart)/timeToDie;
+				material.uniforms.darkness.value = Math.pow(dark,(1+progress*2));
+			};
 
-			}
-
-			pano.addEventListener( 'mousedown', function(e){
-
-        /**
-         * New Controls
-         */
-
-        initializeTimer();
-
-        return;
-
-				e.preventDefault();
-
-				is_moving = true;
-
-				onPointerDownPointerX = e.clientX;
-				onPointerDownPointerY = e.clientY;
-
-				px = hyperlapse.position.x;
-				py = hyperlapse.position.y;
-
-			}, false );
-
-			pano.addEventListener( 'mousemove', function(e){
-
-        /**
-         * New Controls
-         */
-
-        return;
-
-				e.preventDefault();
-				var f = hyperlapse.fov() / 500;
-
-        if ( is_moving ) {
-					var dx = ( onPointerDownPointerX - e.clientX ) * f;
-					var dy = ( e.clientY - onPointerDownPointerY ) * f;
-					hyperlapse.position.x = px + dx; // reversed dragging direction (thanks @mrdoob!)
-					hyperlapse.position.y = py + dy;
-
-					o.position_x = hyperlapse.position.x;
-					o.position_y = hyperlapse.position.y;
+      pano.addEventListener('mousemove', function(e){
+      
+        if (!ready) {
+          return;
         }
-			}, false );
 
-			pano.addEventListener( 'mouseup', function(){
+        var f = hyperlapse.fov() / 500;
+        var dx = (e.webkitMovementX) * f;
+        var dy = (e.webkitMovementY) * f;
 
-        /**
-         * New Controls
-         */
+        var px = (e.clientX / window.innerWidth) - 0.5;
+        var py = (e.clientY / window.innerHeight) - 0.5;
+        hyperlapse.position.x = px * 360;
+        hyperlapse.position.y = - py * 90;
+      
+      });
+
+      var cancelTimer = true;
+
+      pano.addEventListener('mousedown', function(e) {
+
+        if (!ready) {
+          return;
+        }
+
+        var abs = Math.abs(hyperlapse.position.x);
+        var isForward = abs < 45;
+        var isBackward = abs > 90;
+
+        if (isForward || isBackward) {
+          cancelTimer = false;
+          run(isForward);
+        }
+
+      });
+
+      pano.addEventListener('mouseup', function(e) {
 
         cancelTimer = true;
 
-        return;
+      });
 
-				is_moving = false;
-				// hyperlapse.position.x = px;
-				// hyperlapse.position.y = py;
-			}, false );
+      function run(forward) {
+
+        if (!ready) {
+          return;
+        }
+
+        if (forward) {
+          hyperlapse.next();
+        } else {
+          hyperlapse.prev();
+        }
+
+        if (!cancelTimer) {
+          _.delay(run, timeout, forward);
+        }
+
+      }
+
+      var bobHeight = 20;
+      var inc = 0;
+
+      function loop() {
+
+        if (cancelTimer && hyperlapse.camera) {
+          // Bob the camera like panting
+          var cy = hyperlapse.camera.position.y;
+          hyperlapse.camera.position.y = Math.sin(inc) * bobHeight;
+          // hyperlapse.camera.position.z = Math.sin(inc) * bobHeight / 2;
+          inc += 0.04;
+        } else if (!cancelTimer) {
+          accel = 0;
+        }
+
+        requestAnimationFrame(loop);
+
+      }
+
+      loop();
+
+      // pano.addEventListener( 'mousedown', function(e){
+      //  e.preventDefault();
+      // 
+      //  is_moving = true;
+      // 
+      //  onPointerDownPointerX = e.clientX;
+      //  onPointerDownPointerY = e.clientY;
+      // 
+      //  px = hyperlapse.position.x;
+      //  py = hyperlapse.position.y;
+      // 
+      // }, false );
+      // 
+      // pano.addEventListener( 'mousemove', function(e){
+      //  e.preventDefault();
+      //  var f = hyperlapse.fov() / 500;
+      // 
+      //         if ( is_moving ) {
+      //    var dx = ( onPointerDownPointerX - e.clientX ) * f;
+      //    var dy = ( e.clientY - onPointerDownPointerY ) * f;
+      //    hyperlapse.position.x = px + dx; // reversed dragging direction (thanks @mrdoob!)
+      //    hyperlapse.position.y = py + dy;
+      // 
+      //    o.position_x = hyperlapse.position.x;
+      //    o.position_y = hyperlapse.position.y;
+      //         }
+      // }, false );
+      // 
+      // pano.addEventListener( 'mouseup', function(){
+      //  is_moving = false;
+      //  // hyperlapse.position.x = px;
+      //  // hyperlapse.position.y = py;
+      // }, false );
+
+			
 
 			var gui = new dat.GUI();
 
 			var o = {
 				tilt:0, 
-				position_x:180,
+				position_x:0,
 				position_y:0,
 				screen_width: window.innerWidth,
 				screen_height: window.innerHeight,
@@ -282,29 +343,6 @@
 			};
 
 			o.generate();
-
-      function initializeTimer() {
-        accelerate();
-        cancelTimer = false;
-      }
-
-      function accelerate() {
-
-        if (!hyperlapse) {
-          return;
-        }
-
-        hyperlapse.next();
-
-        if (!cancelTimer) {
-          _.delay(requestAnimationFrame, getTimeout(accelAmount), accelerate);
-        }
-      }
-
-      function getTimeout(accelAmount) {
-        
-      }
-
 		}
 
 		window.onload = function() {
