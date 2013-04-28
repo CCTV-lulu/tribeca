@@ -179,6 +179,7 @@ var Hyperlapse = function(container, params) {
 
 	_scene = new THREE.Scene();
 	_scene.add( _camera );
+	this.scene = _scene;
 
 	try {
 		var isWebGL = !!window.WebGLRenderingContext && !!document.createElement('canvas').getContext('experimental-webgl');
