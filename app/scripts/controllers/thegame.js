@@ -11,6 +11,14 @@ angular.module('clientApp')
 
     console.log('game starting');
 
+    // init audio
+    var darksounds = [$('#feeding-loop')[0]];
+    var lightsounds = [];
+
+    $.each(darksounds, function(i, v) {
+      v.play();
+    });
+
     function initHyperlapse() {
 
       /* Hyperlapse */
