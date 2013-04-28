@@ -4,17 +4,41 @@
     <meta charset="utf-8">
     <title>Death Curse</title>
     <style>
+
+      @font-face {
+          font-family: 'populaireregular';
+          src: url('fonts/populaire-webfont.eot');
+          src: url('fonts/populaire-webfont.eot?#iefix') format('embedded-opentype'),
+               url('fonts/populaire-webfont.woff') format('woff'),
+               url('fonts/populaire-webfont.ttf') format('truetype'),
+               url('fonts/populaire-webfont.svg#populaireregular') format('svg');
+          font-weight: normal;
+          font-style: normal;
+      }
+
       * {
         margin: 0;
         padding: 0;
       }
+      body {
+        font-family: 'populaireregular';
+        font-size: 30px;
+        background: #efefef;
+        color: #555;
+      }
       #content {
-        position: relative;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-top: -250px;
+        margin-left: -400px;
         display: none;
         width: 800px;
         height: 500px;
-        margin: 0 auto;
         overflow: hidden;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        background: #6DCFF6;
       }
       #score {
         position: absolute;
@@ -22,16 +46,53 @@
         left: 0;
         z-index: 9999;
         width: 100%;
+        padding: 20px;
       }
       #stats {
         position: absolute;
         display: none;
+/*        display: block;*/
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.66);
+        background: rgba(255, 255, 255, 0.66);
         z-index: 9999;
+      }
+      #stats > div {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        text-align: center;
+        width: 250px;
+        height: 150px;
+        margin-left: -125px;
+        margin-top: -101px;
+        padding: 25px 0;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        background: white;
+      }
+      button {
+        border: 0;
+        background: transparent;
+        text-decoration: underline;
+        font-family: 'populaireregular';
+        font-size: 30px;
+        cursor: pointer;
+        color: #52a1d1;
+      }
+      button:hover {
+        text-decoration: none;
+      }
+      .score:before {
+        content: "Your Score: ";
+      }
+      .highscore:before {
+        content: "Previous High Score: ";
+      }
+      .scripts {
+        display: none;
       }
     </style>
   </head>
@@ -42,6 +103,7 @@
         <div>
           <div class="highscore"></div>
           <div class="score"></div>
+          <br />
           <button>Play Again</button>
         </div>
       </div>
@@ -54,7 +116,23 @@
       <script src="./third-party/mersenne-twister.js"></script>
       <script>
 
+        var moon, wolf, star;
+
         $(function() {
+
+          var _init = _.after(2, init);
+
+          moon = document.createElement('img');
+          $(moon).bind('load', _init);
+          moon.src = './images/moon.png';
+
+          star = document.createElement('img');
+          $(star).bind('load', _init);
+          star.src = './images/star.png';
+
+        });
+
+        function init() {
 
           var M = new MersenneTwister();
 
@@ -82,7 +160,7 @@
           var ground = two.makeRectangle(two.width / 2, two.height - 5, two.width, groundDepth);
           ground.depth = groundDepth;
           ground.noStroke();
-          ground.fill = 'brown';
+          ground.fill = '#5faf7c';
 
           var heroHeight = 20;
           var hero = two.makeRectangle(two.width / 2, two.height, heroHeight, heroHeight);
@@ -184,7 +262,7 @@
 
           function addJump(x, y, r) {
 
-            var color = 'lightblue';
+            var color = 'white';
             var radius = r || 50;
             var diameter = radius * 2;
             var offset = diameter * 1.5;
@@ -192,6 +270,9 @@
 
             var circle = two.makeCircle(x, y, radius);
             circle.noStroke().fill = color;
+            circle.image = moon;
+            circle.width = 50;
+            circle.height = 50;
 
             var amount = 8;
             var particles = _.map(_.range(amount), function(i) {
@@ -200,6 +281,9 @@
               particle.visible = false;
               particle.noStroke().fill = color;
               particle.origin = new Two.Vector(x, y);
+              particle.image = star;
+              particle.width = 25;
+              particle.height = 25;
               return particle;
             });
 
@@ -222,6 +306,7 @@
                   var y = amplitude * Math.sin(theta) + p.origin.y;
                   p.translation.set(x, y);
                   p.opacity = 1 - (k * t) / (k - t + 1);
+                  p.rotation = theta + Math.PI / 2;
                 });
               })
               .onComplete(function() {
@@ -301,7 +386,7 @@
             game.ended = true;
           }
 
-        });
+        }
 
       </script>
     </div>

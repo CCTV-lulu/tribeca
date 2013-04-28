@@ -3365,6 +3365,12 @@ var Backbone = Backbone || {};
         ctx.globalAlpha = opacity;
       }
 
+      if (this.image) {
+        ctx.drawImage(this.image, -this.width, -this.height);
+        ctx.restore();
+        return;
+      }
+
       ctx.beginPath();
       _.each(commands, function(b, i) {
 
@@ -4468,6 +4474,9 @@ var Backbone = Backbone || {};
   _.extend(Shape, {
 
     Properties: [
+      'image',
+      'width',
+      'height',
       'fill',
       'stroke',
       'linewidth',
