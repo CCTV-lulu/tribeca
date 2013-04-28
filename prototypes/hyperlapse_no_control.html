@@ -134,26 +134,26 @@
 				material.uniforms.darkness.value = (timeNow - timeStart)/timeToDie/2;
 			};
 
-      // pano.addEventListener( 'mousedown', function(e){
-      // 
-      //         if (!hyperlapse) {
-      //           return;
-      //         }
-      // 
-      //         var f = hyperlapse.fov() / 500;
-      //         var dx = (e.webkitMovementX) * f;
-      //         var dy = (e.webkitMovementY) * f;
-      // 
-      //         var px = (e.clientX / window.innerWidth) - 0.5;
-      //         var py = (e.clientY / window.innerHeight) - 0.5;
-      //         hyperlapse.position.x = px * 360;
-      //         hyperlapse.position.y = - py * 90;
-      // 
-      //       });
+      pano.addEventListener('mousemove', function(e){
+      
+        if (!ready) {
+          return;
+        }
+
+        var f = hyperlapse.fov() / 500;
+        var dx = (e.webkitMovementX) * f;
+        var dy = (e.webkitMovementY) * f;
+
+        var px = (e.clientX / window.innerWidth) - 0.5;
+        var py = (e.clientY / window.innerHeight) - 0.5;
+        hyperlapse.position.x = px * 360;
+        hyperlapse.position.y = - py * 90;
+      
+      });
 
       var cancelTimer = true;
 
-      pano.addEventListener('mousemove', function(e) {
+      pano.addEventListener('mousedown', function(e) {
 
         if (!ready) {
           return;
