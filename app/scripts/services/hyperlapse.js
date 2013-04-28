@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('clientApp')
-  .factory('hyperlapse', function($rootScope) {
+  .factory('hyperlapse', function($rootScope, animatedParticles) {
   
   var init = function() {
     // $rootScope.position = POSITION;
@@ -76,7 +76,7 @@ angular.module('clientApp')
       zoom: 2,
       use_lookat: false,
       distance_between_points: 2,
-      max_points: 100,
+      max_points: 10,
       material: $rootScope.material
     });
 
@@ -99,9 +99,12 @@ angular.module('clientApp')
     };
 
     $rootScope.hyperlapse.onFrame = function(e) {
-      $rootScope.progress = (e.position+1)/$rootScope.hyperlapse.length();
-      $rootScope.material.uniforms.progress.value = $rootScope.progress;
-      $rootScope.material.uniforms.lightness.value = $rootScope.progress/2;
+      var progress = (e.position+1)/$rootScope.hyperlapse.length();
+      $rootScope.material.uniforms.progress.value = progress;
+      $rootScope.material.uniforms.lightness.value = progress/2;
+      if (progress >= 1) {
+        END();
+      }
     };
 
     $rootScope.timeStart = new Date().getTime()/1000;
@@ -111,15 +114,16 @@ angular.module('clientApp')
     $rootScope.hyperlapse.onAnimate = function() {
       $rootScope.timeNow = new Date().getTime()/1000;
       $rootScope.material.uniforms.time.value = $rootScope.timeNow - $rootScope.timeStart;
-      $rootScope.dark = ($rootScope.timeNow - $rootScope.timeStart)/$rootScope.timeToDie;
-      $rootScope.material.uniforms.darkness.value = $rootScope.dark * 2;
-      if ($rootScope.dark === 1) {
-        DIE();
+      var dark = ($rootScope.timeNow - $rootScope.timeStart)/$rootScope.timeToDie;
+      $rootScope.material.uniforms.darkness.value = dark * 2;
+      if (dark >= 1) {
+        END();
       }
+      animatedParticles.update();
     };
 
-    var DIE = _.once(function() {
-      $rootScope.$broadcast('dead');
+    var END = _.once(function() {
+      $rootScope.$broadcast('end');
     });
 
     var directions_service = new google.maps.DirectionsService();

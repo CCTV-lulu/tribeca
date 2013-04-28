@@ -3,13 +3,13 @@
 angular.module('clientApp')
   .controller('HappywolfyfuntimeandrainbowCtrl', function ($scope, $rootScope, $location) {
 
-        var moon, wolf, star, standing_wolf, grass_flat;
+        var moon, wolf, star, standing_wolf, grass_flat, front_forest, back_forest;
         var BONUS = 1000;
         var $whip, $snowyhill;
 
         $(function() {
 
-          var _init = _.after(5, init);
+          var _init = _.after(7, init);
 
           moon = document.createElement('img');
           $(moon).bind('load', _init);
@@ -30,6 +30,14 @@ angular.module('clientApp')
           grass_flat = document.createElement('img');
           $(grass_flat).bind('load', _init);
           grass_flat.src = './images/grass_flat.png';
+
+          front_forest = document.createElement('img');
+          $(front_forest).bind('load', _init);
+          front_forest.src = '/images/front_trees.png';
+
+          back_forest = document.createElement('img');
+          $(back_forest).bind('load', _init);
+          back_forest.src = '/images/back_trees.png';
 
           $whip = $('#whip');
           $snowyhill = $('#snowyhill');
@@ -80,6 +88,16 @@ angular.module('clientApp')
           hero.particle.position = hero.translation;
           hero.noStroke().fill = 'black';
           hero.destination = new Two.Vector();
+
+          var forest = two.makeRectangle(two.width / 2, two.height - 70, two.width, 351);
+
+          forest.front = two.makeRectangle(two.width / 2, two.height - 75, two.width, 351);
+          forest.image = back_forest;
+          forest.front.image = front_forest;
+          forest.width = two.width / 2;
+          forest.height = 351 / 2;
+          forest.front.width = two.width / 2;
+          forest.front.height = 351 / 2;
 
           var dDiff = 74;
           var nDiff = 30;
