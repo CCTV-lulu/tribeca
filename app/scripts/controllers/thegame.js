@@ -25,7 +25,7 @@ angular.module('clientApp')
 
       /* Hyperlapse */
 
-      animatedParticles.add();
+      animatedParticles.init();
 
       var is_moving = false;
       var px, py;

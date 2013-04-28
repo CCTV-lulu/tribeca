@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('clientApp')
-  .factory('hyperlapse', function($rootScope) {
+  .factory('hyperlapse', function($rootScope, animatedParticles) {
   
   var init = function() {
     // $rootScope.position = POSITION;
@@ -114,6 +114,7 @@ angular.module('clientApp')
       if (dark >= 1) {
         END();
       }
+      animatedParticles.update();
     };
 
     var END = _.once(function() {
