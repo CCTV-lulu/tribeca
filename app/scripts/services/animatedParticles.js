@@ -4,10 +4,11 @@ angular.module('clientApp')
   .factory('animatedParticles', function ($rootScope) {
 
     var spritesheets = [
-      { path: './images/bear-leg.png', offset: 1 / 3, limit: 3 }
+      // { path: './images/bear-leg.png', offset: 1 / 3, limit: 3 }
+      { path: './images/bats.png', offset: 1 / 14, limit: 14 }
     ];
 
-    var amount = 100, sprites, materials, scene;
+    var amount = 5, sprites, materials, scene;
     var frameCount = 0;
 
     return {
@@ -41,10 +42,10 @@ angular.module('clientApp')
           var sprite = new THREE.Sprite(material);
           sprite.imageOptions = imageOptions;
           scene.add(sprite);
-          sprite.position.set(20, Math.random() * 1000 - 500, Math.random() * 1000 - 500);
+          sprite.position.set(0, Math.random() * 1000 - 500, Math.random() * 1000 - 500);
           var size = Math.sqrt(Math.random()) * 100;
           sprite.scale.set(size, size, 1);
-          sprite.velocity = Math.random() * 10;
+          sprite.velocity = 10;
           return sprite;
         });
 
