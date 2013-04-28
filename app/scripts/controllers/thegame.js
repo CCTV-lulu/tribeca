@@ -99,6 +99,29 @@ angular.module('clientApp')
       var bobHeight = 20;
       var inc = 0;
 
+      function playSounds(ids, callback)  {
+        if (ids.length == 0) {
+          callback();
+          return;
+        }
+        var storyCurrentId = ids.shift();
+         var $story = $('#story-'+storyCurrentId)
+         var story = $story[0];
+          console.log('story', story)
+          story.play();
+          $story.on("ended", function(){
+            console.log('end');
+            playSounds(ids, callback);
+          });
+      }
+
+      $rootScope.CINEMATIC = true;
+      var ids = audioMap.start['0'].sounds;
+      playSounds(ids, function() {
+        $rootScope.CINEMATIC = false;
+      });
+
+
       function loop() {
 
         if (cancelTimer && $rootScope.hyperlapse.camera) {
@@ -109,8 +132,15 @@ angular.module('clientApp')
           inc += 0.04;
         }
 
-        requestAnimationFrame(loop);
 
+        if ($rootScope.CINEMATIC == false) {
+          var l = $rootScope.progress;
+          var d = $rootscope.darkness;
+
+        }
+
+
+        requestAnimationFrame(loop);
       }
 
       loop();
@@ -141,7 +171,42 @@ angular.module('clientApp')
           };
         }, 200
       )
+
     };
+
+    var storyCurrentId = 1;
+    var played = [];
+
+    var audioMap = {
+      'start': {
+        '0': {
+          sounds: [1,2,3,4,5,6,7,8,9,10]
+        },
+      },
+      'light': {
+        '.5': {
+          sounds: []
+        },
+        '.75': {
+          sounds: []
+        },
+        '1': {
+          sounds: []
+        }
+      },
+      'dark': {
+        '.5': {
+          sounds: []
+        },
+        '.75': {
+          sounds: []
+        },
+        '1': {
+          sounds: []
+        }
+      },
+    }
+    
 
     start();
 
