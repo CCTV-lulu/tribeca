@@ -3,12 +3,13 @@
 angular.module('clientApp')
   .controller('HappywolfyfuntimeandrainbowCtrl', function ($scope, $location) {
 
-        var moon, wolf, star;
+        var moon, wolf, star, standing_wolf, grass_flat;
         var BONUS = 1000;
+        var $whip, $snowyhill;
 
         $(function() {
 
-          var _init = _.after(3, init);
+          var _init = _.after(5, init);
 
           moon = document.createElement('img');
           $(moon).bind('load', _init);
@@ -21,6 +22,17 @@ angular.module('clientApp')
           wolf = document.createElement('img');
           $(wolf).bind('load', _init);
           wolf.src = './images/wolf.png';
+
+          standing_wolf = document.createElement('img');
+          $(standing_wolf).bind('load', _init);
+          standing_wolf.src = './images/holdstill.png';
+
+          grass_flat = document.createElement('img');
+          $(grass_flat).bind('load', _init);
+          grass_flat.src = './images/grass_flat.png';
+
+          $whip = $('#whip');
+          $snowyhill = $('#snowyhill');
 
         });
 
@@ -51,11 +63,14 @@ angular.module('clientApp')
 
           two.$domElement = $(two.renderer.domElement);
 
-          var groundDepth = 50;
+          var groundDepth = 216;
           var ground = two.makeRectangle(two.width / 2, two.height - 5, two.width, groundDepth);
           ground.depth = groundDepth;
           ground.noStroke();
           ground.fill = '#5faf7c';
+          ground.image = grass_flat;
+          ground.width = two.width / 2;
+          ground.height = groundDepth / 2;
 
           var heroHeight = 60;
           var hero = two.makeRectangle(two.width / 2, two.height, heroHeight, heroHeight);
@@ -85,6 +100,7 @@ angular.module('clientApp')
           hero.jump = function() {
             this.particle.velocity.y = - 20;
             if (game.started) {
+              $whip[0].play();
               updateScore();
             }
             return this;
@@ -149,7 +165,8 @@ angular.module('clientApp')
               if (Math.abs(delta) > 0.1) {
                 run(isLeft);
               } else {
-                stand();
+                run(isLeft, true)
+                // stand();
               }
 
               _.each(jumps, function(jump, i) {
@@ -187,12 +204,22 @@ angular.module('clientApp')
             updateFrame();
           }
 
-          function run(isLeft) {
+          function run(isLeft, standing) {
             // Flip the stance
             if (!_.isUndefined(isLeft)) {
               hero.reflectY = !isLeft;
             }
-            frame = (frame + 0.5) % frameCount;
+            var value = 0.5;
+            if (!!standing) {
+              value = 0.33;
+            }
+            if (!!standing && hero.image !== standing_wolf) {
+              hero.image = standing_wolf;
+            }
+            if (!standing && hero.image !== wolf) {
+              hero.image = wolf;
+            }
+            frame = (frame + value) % frameCount;
             updateFrame();
           }
 
@@ -371,12 +398,20 @@ angular.module('clientApp')
         	$scope.offer = true;
         	$scope.$apply();
         	$('#content').css('-webkit-filter', 'blur(10px)');
+        	$snowyhill[0].pause();
+        	var offer = $('#00-offer-intro')[0];
+        	offer.play();
+        	offer.addEventListener('end', function() {
+        		console.log('finished');
+        	});
         }
 
         // $scope.offer = true;
          // $scope.offer = true;
 
         $scope.agree = function() {
+        	var offer = $('#00-offer-intro')[0];
+        	offer.stop();
         	$scope.offer = false;
         	$location.path("thegame");
         }
@@ -385,5 +420,6 @@ angular.module('clientApp')
         	physics.play();
         	$scope.offer = false;
         	$('#content').css('-webkit-filter', 'none');
+        	$snowyhill[0].play();
         }
     });
