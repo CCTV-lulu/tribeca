@@ -42,7 +42,7 @@
         background: linear-gradient(to bottom, #6932ff 0%,#815dad 100%); /* W3C */
         filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6932ff', endColorstr='#815dad',GradientType=0 ); /* IE6-9 */
       }
-      #content .wrapper {
+      .wrapper {
         position: absolute;
         top: 0;
         left: 0;
@@ -108,11 +108,21 @@
       #offer {
       	text-align: center;
         position: absolute;
-        top: 50%;
+        top: 0;
         left: 0;
-        z-index: 9999;
         width: 100%;
-        padding: 20px;
+        height: 100%;
+        z-index: 9999;
+      }
+      #offer .wrapper {
+        background: rgba(0, 0, 0, 0.5);
+      }
+      #offer .wrapper > div {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-left: -102px;
+        margin-top: -36px;
       }
     </style>
     <div id="content">
@@ -126,9 +136,15 @@
           <button>Play Again</button>
         </div>
       </div>
-      <div id="offer" ng-show="offer">
-      	<button ng-click="agree()">Agree</button>
-      	&nbsp;
-      	<button ng-click="disagree()">Be a pussy</button>
+    </div>
+
+    <div id="offer" ng-show="offer">
+      <div class="wrapper">
+        <div>
+          Wanna play a real game?<br />
+          <button ng-click="agree()">Agree</button>
+        	&nbsp;
+        	<button ng-click="disagree()">Keep Playing</button>
+        </div>
       </div>
     </div>
