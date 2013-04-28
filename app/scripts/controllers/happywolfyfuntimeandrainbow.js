@@ -374,7 +374,7 @@ angular.module('clientApp')
         	spooky
         }
 
-        $scope.offer = true;
+        // $scope.offer = true;
         // $scope.$apply();
 
         $scope.agree = function() {
