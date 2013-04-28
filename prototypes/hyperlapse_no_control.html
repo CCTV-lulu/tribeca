@@ -26,9 +26,10 @@
 		var start_point, end_point, lookat_point;
 
 		var ma, directions_service, streetview_service;
-		var ready = false, timeout = 1000 / 12;
+		var ready = false, timeout = 1000 / 12, progress = 0;
 
 		var timeStart = new Date().getTime()/1000;
+		var timeNow = new Date().getTime()/1000;
 		var timeToDie = 60;
 
 		function getLocation() {
@@ -120,18 +121,20 @@
 
 			hyperlapse.onLoadComplete = function(e) {
         ready = true;
+        timeStart = new Date().getTime()/1000;
 			};
 
 			hyperlapse.onFrame = function(e) {
-				var progress = (e.position+1)/hyperlapse.length();
+				progress = (e.position+1)/hyperlapse.length();
 				material.uniforms.progress.value = progress;
-				material.uniforms.lightness.value = progress;
+				material.uniforms.lightness.value = progress/2;
 			};
 
 			hyperlapse.onAnimate = function() {
-				var timeNow = new Date().getTime()/1000;
+				timeNow = new Date().getTime()/1000;
 				material.uniforms.time.value = timeNow - timeStart;
-				material.uniforms.darkness.value = (timeNow - timeStart)/timeToDie/2;
+				var dark = (timeNow - timeStart)/timeToDie;
+				material.uniforms.darkness.value = Math.pow(dark,(1+progress*2));
 			};
 
       pano.addEventListener('mousemove', function(e){
@@ -260,6 +263,7 @@
 				screen_width: window.innerWidth,
 				screen_height: window.innerHeight,
 				lightness: 0,
+				darkness: 0,
 				generate:function(){
 					request = {
 						origin: start_point, 
@@ -295,9 +299,14 @@
 			});
 
 
-			var lightness_control = parameters.add(o, 'lightness', 0, 1);
+			var lightness_control = parameters.add(o, 'lightness', 0, 2);
 			lightness_control.onChange(function(value) {
 				material.uniforms.lightness.value = value;
+			});
+
+			var darkness_control = parameters.add(o, 'darkness', 0, 2);
+			darkness_control.onChange(function(value) {
+				material.uniforms.darkness.value = value;
 			});
 
 			// parameters.open();
