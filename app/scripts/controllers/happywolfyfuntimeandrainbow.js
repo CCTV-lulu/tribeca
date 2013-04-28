@@ -371,12 +371,19 @@ angular.module('clientApp')
         	$scope.offer = true;
         	$scope.$apply();
         	$('#content').css('-webkit-filter', 'blur(10px)');
+        	var offer = $('#00-offer-intro')[0];
+        	offer.play();
+        	offer.addEventListener('end', function() {
+        		console.log('finished');
+        	});
         }
 
         // $scope.offer = true;
          // $scope.offer = true;
 
         $scope.agree = function() {
+        	var offer = $('#00-offer-intro')[0];
+        	offer.stop();
         	$scope.offer = false;
         	$location.path("thegame");
         }
