@@ -75,7 +75,7 @@ angular.module('clientApp')
       zoom: 2,
       use_lookat: false,
       distance_between_points: 2,
-      max_points: 10,
+      max_points: 100,
       material: $rootScope.material
     });
 
