@@ -3,23 +3,42 @@
 angular.module('clientApp')
   .controller('ThegameCtrl', function ($scope, $rootScope) {
 
+    function BufferLoader(context,urlList,callback){this.context=context;this.urlList=urlList;this.onload=callback;this.bufferList=new Array();this.loadCount=0;}
+BufferLoader.prototype.loadBuffer=function(url,index){var request=new XMLHttpRequest();request.open("GET",url,true);request.responseType="arraybuffer";var loader=this;request.onload=function(){loader.context.decodeAudioData(request.response,function(buffer){if(!buffer){alert('error decoding file data: '+url);return;}
+loader.bufferList[index]=buffer;if(++loader.loadCount==loader.urlList.length)
+loader.onload(loader.bufferList);},function(error){console.error('decodeAudioData error',error);});}
+request.onerror=function(){alert('BufferLoader: XHR error');}
+request.send();}
+BufferLoader.prototype.load=function(){for(var i=0;i<this.urlList.length;++i)
+this.loadBuffer(this.urlList[i],i);}
+
     var ready = false, timeout = 1000 / 12, progress = 0;
 
     $rootScope.timeStart = new Date().getTime()/1000;
     $rootScope.timeNow = new Date().getTime()/1000;
     $rootScope.timeToDie = 60;
+    $rootScope.CINEMATIC = false;
 
     console.log('game starting');
 
     var initialized = false;
 
     // init audio
-    var darksounds = [$('#feeding-loop')[0]];
-    var lightsounds = [];
-
-    $.each(darksounds, function(i, v) {
-      v.play();
-    });
+    var ctx = new webkitAudioContext();
+    var darkgain = ctx.createGainNode();
+    var darksounds = new BufferLoader(ctx, [
+      'audio/gore/160975__vosvoy__ragingzombie-feeding-loop.mp3'
+      ], function(list) {
+        $.each(list, function(i, b) {
+          var s = ctx.createBufferSource();
+          s.buffer = b;
+          s.loop = true;
+          s.connect(darkgain);
+          s.noteOn(0);
+        });
+        darkgain.connect(ctx.destination);
+      });
+    darksounds.load();
 
     function initHyperlapse() {
 
@@ -50,6 +69,9 @@ angular.module('clientApp')
         var py = (e.clientY / window.innerHeight) - 0.5;
         $rootScope.hyperlapse.position.x = px * 360;
         $rootScope.hyperlapse.position.y = - py * 90;
+
+        var gain = Math.abs($rootScope.hyperlapse.position.x / 180.0);
+        darkgain.gain.value = gain;
       
       });
 
@@ -60,6 +82,11 @@ angular.module('clientApp')
         if (!ready) {
           return;
         }
+
+        if ($rootScope.CINEMATIC) {
+          return;
+        }
+
 
         var abs = Math.abs($rootScope.hyperlapse.position.x);
         var isForward = abs < 45;
@@ -153,6 +180,9 @@ angular.module('clientApp')
       function onKeyDown ( event ) {
         var key = event.keyCode;
         // console.log(key)
+        if ($rootScope.CINEMATIC) {
+          return;
+        }  
         if (key == 190 || key == 38 || key == 39 || key == 87 || key == 68 || key == 32) /* > */
           $rootScope.hyperlapse.next();
         if (key == 188 || key == 37 || key == 40 || key == 83 || key == 65 || key == 8) /* < */
