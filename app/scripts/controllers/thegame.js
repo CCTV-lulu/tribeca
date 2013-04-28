@@ -97,8 +97,6 @@ angular.module('clientApp')
           $rootScope.hyperlapse.camera.position.y = Math.sin(inc) * bobHeight;
           // $rootScope.hyperlapse.camera.position.z = Math.sin(inc) * bobHeight / 2;
           inc += 0.04;
-        } else if (!cancelTimer) {
-          accel = 0;
         }
 
         requestAnimationFrame(loop);

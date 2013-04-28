@@ -133,10 +133,10 @@
       }
       #offer .wrapper {
 /*        background: rgba(255, 0, 0, 0.66);*/
-        -webkit-animation: pulse 2s infinite; /* Safari 4+ */
-        -moz-animation:    pulse 2s infinite; /* Fx 5+ */
-        -o-animation:      pulse 2s infinite; /* Opera 12+ */
-        animation:         pulse 2s infinite; /* IE 10+ */
+        -webkit-animation: pulse 0.5s infinite; /* Safari 4+ */
+        -moz-animation:    pulse 0.5s infinite; /* Fx 5+ */
+        -o-animation:      pulse 0.5s infinite; /* Opera 12+ */
+        animation:         pulse 0.5s infinite; /* IE 10+ */
         -webkit-animation-direction: alternate;
         animation-direction: alternate;
       }
@@ -144,8 +144,8 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        margin-left: -102px;
-        margin-top: -36px;
+        margin-left: -188px;
+        margin-top: -171px;
       }
     </style>
     <div id="content">
@@ -164,10 +164,20 @@
     <div id="offer" ng-show="offer">
       <div class="wrapper">
         <div>
-          Wanna play a real game?<br />
+          Not bad, wanna play a real game?<br />
           <spooky class="spooky-link" ng-click="agree()">Agree</spooky>
-        	&nbsp;
         	<spooky class="spooky-link" ng-click="disagree()">Keep Playing</spooky>
         </div>
       </div>
     </div>
+
+    <audio id="snowyhill" preload="auto" autoplay="autoplay" loop="loop">
+      <source src="./audio/pregame/snowyhill.mp3">
+      Your browser does not support the audio element.
+    </audio>
+    <audio id="whip" preload="auto">
+      <source src="./audio/pregame/whip.mp3">
+      Your browser does not support the audio element.
+    </audio>
+
+    <audio id="00-offer-intro" src="audio/00-offer-intro.mp3"></audio>

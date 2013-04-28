@@ -13,9 +13,14 @@ angular.module('clientApp', [])
       }]
     };
     $routeProvider
+      // .when('/', {
+      //   templateUrl: 'views/main.html',
+      //   controller: 'MainCtrl'
+      // })
       .when('/', {
-        templateUrl: 'views/main.html',
-        controller: 'MainCtrl'
+        templateUrl: 'views/happywolfyfuntimeandrainbow.html',
+        controller: 'HappywolfyfuntimeandrainbowCtrl',
+        resolve: animatein
       })
       .when('/3daudio', {
         templateUrl: 'views/3daudio.html',
