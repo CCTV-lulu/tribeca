@@ -220,7 +220,7 @@
 
           var amount = 25;
           var summit = 0;
-          var verticalIncrement = 250;
+          var verticalIncrement = 150;
           var jumps = window.jumps = _.map(_.range(amount), function(i) {
             return addJump(getHorizontal(), getVertical());
           });
@@ -260,16 +260,17 @@
                 isLeft = true;
               }
 
-              var step = 10;
+              var step = 12;
 
               position.y = Math.min(ground.constraint, position.y);
-              if (Math.abs(delta) <= step) {
-                position.x = hero.destination.x;
-              } else if (delta < step) {
-                position.x -= 7;
-              } else if (delta > step) {
-                position.x += step;
-              }
+              // if (Math.abs(delta) <= step) {
+              //   position.x = hero.destination.x;
+              // } else if (delta < step) {
+              //   position.x -= 7;
+              // } else if (delta > step) {
+              //   position.x += step;
+              // }
+              position.x += (hero.destination.x - position.x) * 0.125;
 
               if (Math.abs(delta) > 0.1) {
                 run(isLeft);
