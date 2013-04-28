@@ -29,16 +29,6 @@
 }
 
 @font-face {
-    font-family: 'Brain Flower';
-    src: url('../fonts/brain_flower.eot');
-    src: url('../fonts/brain_flower.eot?#iefix') format('embedded-opentype'),
-         url('../fonts/brain_flower.woff') format('woff'),
-         url('../fonts/brain_flower.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-}
-
-@font-face {
     font-family: 'Crimes Six';
     src: url('../fonts/crimes_times_six.eot');
     src: url('../fonts/crimes_times_six.eot?#iefix') format('embedded-opentype'),
@@ -69,9 +59,6 @@
     font-style: normal;
 }
 
-body {
-	background: #000;
-}
 
 .make-spooky {
 	opacity: 0;
@@ -91,11 +78,10 @@ body {
 	font-size: 3em;
 	font-family: "Helvetica Neue";
 	opacity: 0;
-
-
 }
 
 .spooky-char {
+    opacity: 0;
 	display: inline-block;
 	position: relative;
 	-webkit-transform-style: preserve-3d;
@@ -109,9 +95,5 @@ body {
    
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
-
-}
-
-.spooky-space {
 
 }

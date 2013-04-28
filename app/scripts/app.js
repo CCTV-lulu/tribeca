@@ -12,6 +12,7 @@ angular.module('clientApp', [])
         return d.promise;
       }]
     };
+
     $routeProvider
       .when('/', {
         templateUrl: 'views/main.html',
