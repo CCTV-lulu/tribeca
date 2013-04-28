@@ -84,8 +84,12 @@ angular.module('clientApp')
 
   	    spawn:function(text, selector) {
   	    	var spawn = $('<div/>').addClass('make-spooky').html(text);
-  	    	$(selector || '.container').replaceWith(spawn);
-  	    	app.spookify(spawn);
+  	    	var $el = $(selector || '.container');
+  	    	$el.children().hide();
+  	    	_.defer(function() {
+  	    	  $el.append(spawn);
+    	    	app.spookify(spawn);
+  	    	});
   	    },
 
 
