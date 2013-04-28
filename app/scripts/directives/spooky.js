@@ -6,7 +6,7 @@ angular.module('clientApp')
     var app = {
 
   		_fonts: [
-  			"Nightbird", "Face Your Fears", "Brain Flower", "Bloody", "Crimes Six", "Frankentype", "Monsterama"
+  			"Nightbird", "Face Your Fears", "Bloody", "Crimes Six", "Frankentype", "Monsterama"
   		],
 
   		init: function() {
@@ -45,27 +45,22 @@ angular.module('clientApp')
   	        el.transition({
   	        	rotateY: app.range(-20,20,true)+'deg',
   	        	scale: [0.6, 1],
-  	        	translate: [0, 100]
+              opacity: 1
   	        });
-
-  	        el.transition({
-  	        	opacity: 1,
-  	        	translate: [0, 0],
-  	        	duration: 2000
-  	        })
-
+            
   	        var letters = el.children('span');
 
   	        _.each(letters, function(letter, index) {
   	        	var jqLtr = $(letter);
   	            jqLtr.addClass('spooky-char');
   	            if (jqLtr.html() == ' ') jqLtr.html('&nbsp;')
-  	            else app.jitter(jqLtr);
+  	            else app.jitter(jqLtr, index, true);
   	        });
 
   	    },
 
-  	    jitter:function(jqLtr) {
+  	    jitter:function(jqLtr, index, first) {
+            var delay = (first) ? (index*100) + 1000 : 0;
   	    	_.defer(function(){
   	    		var ref = jqLtr;
   		    	jqLtr.transition({
@@ -76,8 +71,8 @@ angular.module('clientApp')
   	                duration: app.range(1000, 2000),
   	                easing: 'linear',
   	                '-webkit-filter': 'blur(' + app.range(0, 5) + 'px)',
-  	                delay: 0,
-  	                complete: function() {app.jitter(ref)}
+  	                delay: delay,
+  	                complete: function() { app.jitter(ref, 0, false)}
   		   		});
   	    	})
   	    },
