@@ -4,7 +4,8 @@
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/> 
 	<title>Viewer Example</title> 
 
-	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places" type="text/javascript"></script> 
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places" type="text/javascript">
+	</script> 
 	<script src="third-party/dat.gui.min.js"></script>
 	<script src="third-party/three.min.js"></script>
 	<script src="third-party/GSVPano.js"></script>
@@ -38,7 +39,7 @@
 		    location: start_point,
 		    //radius: 10000,
 		    types: ['funeral_home', 'cemetery'],
-		    // keyword: 'chelsea park',
+		    keyword: 'chelsea',
 		    rankBy: google.maps.places.RankBy.DISTANCE
 		  };
 			service = new google.maps.places.PlacesService(map);
@@ -126,9 +127,20 @@
 
 		function initHyperlapse() {
 
-			//TODO: Init here
+			uniforms = {
+					map: { type: "t", value: null },
+					progress: { type: "f", value: null},
+					lightness: { type: "f", value: 0},
+					darkness: { type: "f", value: 0}
+			};
 
-			/* Map */
+			var material = material = new THREE.ShaderMaterial( {
+
+					uniforms: uniforms,
+					vertexShader: document.getElementById( 'vertexShader' ).textContent,
+					fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+
+				} );
 
 			/* Hyperlapse */
 
@@ -145,11 +157,11 @@
 				height: window.innerHeight,
 				zoom: 2,
 				use_lookat: false,
-				distance_between_points: 1,
-				max_points: 200,
-				elevation: _elevation
+				distance_between_points: 2,
+				max_points: 100,
+				elevation: _elevation,
+				material: material
 			});
-			
 			
 
 			hyperlapse.onError = function(e) {
@@ -182,6 +194,7 @@
 					"<br>End: " + end_pin.getPosition().toString() + 
 					"<br>Lookat: " + pivot_pin.getPosition().toString() + 
 					"<br>Ready." );
+					hyperlapse.play();
 			};
 
 			hyperlapse.onFrame = function(e) {
@@ -191,6 +204,11 @@
 					"<br>Lookat: " + pivot_pin.getPosition().toString() + 
 					"<br>Position: "+ (e.position+1) +" of "+ hyperlapse.length() );
 				camera_pin.setPosition(e.point.location);
+
+				var progress = (e.position+1)/hyperlapse.length();
+				material.uniforms.progress.value = progress;
+				material.uniforms.lightness.value = progress;
+
 			};
 
 			pano.addEventListener( 'mousedown', function(e){
@@ -225,8 +243,8 @@
 			pano.addEventListener( 'mouseup', function(){
 				is_moving = false;
 
-				// hyperlapse.position.x = px;
-				//hyperlapse.position.y = py;
+				hyperlapse.position.x = px;
+				hyperlapse.position.y = py;
 			}, false );
 
 			
@@ -236,7 +254,7 @@
 			var gui = new dat.GUI();
 
 			var o = {
-				distance_between_points:10, 
+				distance_between_points:5, 
 				max_points:100, 
 				fov: 100, 
 				elevation:Math.floor(_elevation), 
@@ -250,6 +268,7 @@
 				use_lookat:false,
 				screen_width: window.innerWidth,
 				screen_height: window.innerHeight,
+				lightness: 0,
 				generate:function(){
 					show( "Generating route..." );
 
@@ -340,6 +359,11 @@
 				hyperlapse.use_lookat = value;
 			});
 
+			var lightness_control = parameters.add(o, 'lightness', 0, 1);
+			lightness_control.onChange(function(value) {
+				material.uniforms.lightness.value = value;
+			});
+
 			parameters.open();
 			
 
@@ -386,6 +410,45 @@
 
 	</script> 
 </head> 
+		<script id="vertexShader" type="x-shader/x-vertex">
+
+			varying vec2 vUv;
+			varying vec3 vNormal;
+
+			void main()	{
+
+				vUv = uv;
+				vNormal = normal.xyz;
+				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+				gl_Position = projectionMatrix * mvPosition;
+
+			}
+
+		</script>
+
+		<script id="fragmentShader" type="x-shader/x-fragment">
+
+			varying vec2 vUv;
+			varying vec3 vNormal;
+			uniform sampler2D map;
+			uniform float darkness;
+			uniform float lightness;
+
+			void main()	{
+
+				vec3 tex = texture2D( map, vUv ).xyz;
+				float grayscale = (tex.r+tex.g+tex.b)/3.0;
+
+				float highlights = (grayscale-2.0/3.0);
+
+				float light = max((vNormal.x-1.0+lightness)*(4.*lightness),0.);
+				float dark = max((-vNormal.x-1.0+lightness)*(4.*lightness),0.);
+
+				gl_FragColor = vec4(tex+light-dark, 1.0);
+
+			}
+
+		</script>
 <body> 
 	<div id="pano" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index:-1;"></div>
 	<div id="controls">
