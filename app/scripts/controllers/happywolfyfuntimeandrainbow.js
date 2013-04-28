@@ -3,12 +3,12 @@
 angular.module('clientApp')
   .controller('HappywolfyfuntimeandrainbowCtrl', function ($scope, $location) {
 
-        var moon, wolf, star, standing_wolf;
+        var moon, wolf, star, standing_wolf, grass_flat;
         var BONUS = 1000;
 
         $(function() {
 
-          var _init = _.after(4, init);
+          var _init = _.after(5, init);
 
           moon = document.createElement('img');
           $(moon).bind('load', _init);
@@ -23,8 +23,12 @@ angular.module('clientApp')
           wolf.src = './images/wolf.png';
 
           standing_wolf = document.createElement('img');
-          $(wolf).bind('load', _init);
-          wolf.src = './images/holdstill.png';
+          $(standing_wolf).bind('load', _init);
+          standing_wolf.src = './images/holdstill.png';
+
+          grass_flat = document.createElement('img');
+          $(grass_flat).bind('load', _init);
+          grass_flat.src = './images/grass_flat.png';
 
         });
 
@@ -55,11 +59,14 @@ angular.module('clientApp')
 
           two.$domElement = $(two.renderer.domElement);
 
-          var groundDepth = 50;
+          var groundDepth = 216;
           var ground = two.makeRectangle(two.width / 2, two.height - 5, two.width, groundDepth);
           ground.depth = groundDepth;
           ground.noStroke();
           ground.fill = '#5faf7c';
+          ground.image = grass_flat;
+          ground.width = two.width / 2;
+          ground.height = groundDepth / 2;
 
           var heroHeight = 60;
           var hero = two.makeRectangle(two.width / 2, two.height, heroHeight, heroHeight);
@@ -197,13 +204,17 @@ angular.module('clientApp')
             if (!_.isUndefined(isLeft)) {
               hero.reflectY = !isLeft;
             }
+            var value = 0.5;
+            if (!!standing) {
+              value = 0.33;
+            }
             if (!!standing && hero.image !== standing_wolf) {
               hero.image = standing_wolf;
             }
             if (!standing && hero.image !== wolf) {
               hero.image = wolf;
             }
-            frame = (frame + 0.5) % frameCount;
+            frame = (frame + value) % frameCount;
             updateFrame();
           }
 
