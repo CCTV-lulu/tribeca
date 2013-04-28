@@ -3,8 +3,9 @@
 angular.module('clientApp')
   .controller('ThegameCtrl', function ($scope, $rootScope) {
 
-    var start_point, end_point, lookat_point;
+    $(document.body).addClass('thegame');
 
+    var start_point, end_point, lookat_point;
     var map, directions_service, streetview_service;
     var ready = false, timeout = 1000 / 12, progress = 0;
 
@@ -46,7 +47,7 @@ angular.module('clientApp')
       var offset = { x: 0, y: 0 };
 
       var hyperlapse = new Hyperlapse(pano, {
-        lookat: lookat_point,
+        lookat: $rootScope.end_point,
         fov: 100,
         millis: 50,
         width: window.innerWidth,
@@ -58,7 +59,6 @@ angular.module('clientApp')
         material: material
       });
       
-
       hyperlapse.onError = function(e) {
         console.log( "ERROR: "+ e.message );
       };
@@ -69,6 +69,9 @@ angular.module('clientApp')
 
       hyperlapse.onLoadComplete = function(e) {
         ready = true;
+        timeStart = new Date().getTime() / 1000;
+        $('#lobby').fadeOut(5000);
+        console.log('hyperlapse ready');
         hyperlapse.next();
         hyperlapse.prev();
         timeStart = new Date().getTime()/1000;
@@ -158,8 +161,6 @@ angular.module('clientApp')
           hyperlapse.camera.position.y = Math.sin(inc) * bobHeight;
           // hyperlapse.camera.position.z = Math.sin(inc) * bobHeight / 2;
           inc += 0.04;
-        } else if (!cancelTimer) {
-          accel = 0;
         }
 
         requestAnimationFrame(loop);
@@ -170,75 +171,24 @@ angular.module('clientApp')
 
       var gui = new dat.GUI();
 
-      var o = {
-        tilt:0, 
-        position_x:0,
-        position_y:0,
-        screen_width: window.innerWidth,
-        screen_height: window.innerHeight,
-        lightness: 0,
-        darkness: 0,
-        generate:function(){
-          var request = {
-            origin: start_point, 
-            destination: end_point, 
-            travelMode: google.maps.DirectionsTravelMode.DRIVING
-          };
+      var generate = function(){
+        var request = {
+          origin: $rootScope.start_point, 
+          destination: $rootScope.end_point, 
+          travelMode: google.maps.DirectionsTravelMode.DRIVING
+        };
 
-          directions_service.route(request, function(response, status) {
-            if (status == google.maps.DirectionsStatus.OK) {   
-              hyperlapse.generate({route: response});
-            } else {
-              console.log(status);
-            }
-          })
-        },
+        directions_service.route(request, function(response, status) {
+          if (status == google.maps.DirectionsStatus.OK) {   
+            hyperlapse.generate({route: response});
+          } else {
+            console.log(status);
+          }
+        })
       };
-
-      var parameters = gui.addFolder('parameters');
-
-      var position_x_control = parameters.add(o, 'position_x', -360, 360).listen();
-      position_x_control.onChange(function(value) {
-        hyperlapse.position.x = value;
-      });
-
-      var position_y_control = parameters.add(o, 'position_y', -180, 180).listen();
-      position_y_control.onChange(function(value) {
-        hyperlapse.position.y = value;
-      });
-
-      var tilt_control = parameters.add(o, 'tilt', -Math.PI, Math.PI);
-      tilt_control.onChange(function(value) {
-        hyperlapse.tilt = value;
-      });
-
-
-      var lightness_control = parameters.add(o, 'lightness', 0, 2);
-      lightness_control.onChange(function(value) {
-        material.uniforms.lightness.value = value;
-      });
-
-      var darkness_control = parameters.add(o, 'darkness', 0, 2);
-      darkness_control.onChange(function(value) {
-        material.uniforms.darkness.value = value;
-      });
-
-      // parameters.open();
-      
-      var play_controls = gui.addFolder('play controls');
-      play_controls.add(hyperlapse, 'play');
-      play_controls.add(hyperlapse, 'pause');
-      play_controls.add(hyperlapse, 'next');
-      play_controls.add(hyperlapse, 'prev');
-      play_controls.open();
-
-      // gui.hide();
-      // gui.domElement.style.display = 'none';
 
       window.addEventListener('resize', function(){
         hyperlapse.setSize(window.innerWidth, window.innerHeight);
-        o.screen_width = window.innerWidth;
-        o.screen_height = window.innerHeight;
       }, false);
 
       document.addEventListener( 'keydown', onKeyDown, false );
@@ -256,7 +206,7 @@ angular.module('clientApp')
 
       };
 
-      o.generate();
+      generate();
     }
 
     initHyperlapse();

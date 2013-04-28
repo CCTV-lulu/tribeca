@@ -12,11 +12,15 @@ angular.module('clientApp', [])
         return d.promise;
       }]
     };
-
     $routeProvider
+      // .when('/', {
+      //   templateUrl: 'views/main.html',
+      //   controller: 'MainCtrl'
+      // })
       .when('/', {
-        templateUrl: 'views/main.html',
-        controller: 'MainCtrl'
+        templateUrl: 'views/happywolfyfuntimeandrainbow.html',
+        controller: 'HappywolfyfuntimeandrainbowCtrl',
+        resolve: animatein
       })
       .when('/3daudio', {
         templateUrl: 'views/3daudio.html',
@@ -55,5 +59,9 @@ angular.module('clientApp', [])
     $rootScope.$on('$routeChangeStart', function() {
       $('.container').css('opacity', 0);
     });
-    hyperlapse.init();
+    navigator.geolocation.getCurrentPosition( function(position){
+      $rootScope.position = position;
+      console.log($rootScope.position);
+      hyperlapse.init();
+    }, alert );
   });

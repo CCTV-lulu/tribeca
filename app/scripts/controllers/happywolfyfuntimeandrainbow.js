@@ -374,7 +374,7 @@ angular.module('clientApp')
         }
 
         // $scope.offer = true;
-        //$scope.$apply();
+         // $scope.offer = true;
 
         $scope.agree = function() {
         	$scope.offer = false;
