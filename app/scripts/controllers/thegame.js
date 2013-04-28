@@ -40,9 +40,73 @@ this.loadBuffer(this.urlList[i],i);}
           s.connect(darkgain);
           s.noteOn(0);
         });
+        darkgain.gain.value = 0.3;
         darkgain.connect(ctx.destination);
       });
     darksounds.load();
+
+
+
+      function playSounds(ids, callback)  {
+        if (ids.length == 0) {
+          callback();
+          return;
+        }
+        var storyCurrentId = ids.shift();
+         var $story = $('#story-'+storyCurrentId)
+         var story = $story[0];
+          console.log('story', story)
+          story.play();
+          $story.on("ended", function(){
+            console.log('end');
+            playSounds(ids, callback);
+          });
+      }
+
+
+
+       var audioMap = {
+      'start': {
+        '0': {
+          sounds: [1,2,3]
+        },
+      },
+      'light': {
+        '.25': {
+          sounds: [4,7,8]
+        },
+        '.5': {
+          sounds: [5,6]
+        },
+        '.75': {
+          sounds: [11,12,13]
+        },
+        '1': {
+          sounds: [14,15]
+        }
+      },
+      'dark': {
+        '.25': {
+          sounds: [16,17]
+        },
+        '.5': {
+          sounds: [18,19]
+        },
+        '.75': {
+          sounds: [20,21]
+        },
+        '1': {
+          sounds: [22,23]
+        }
+      },
+    };
+
+
+      $rootScope.CINEMATIC = true;
+      var ids = audioMap.start['0'].sounds;
+      playSounds(ids, function() {
+        $rootScope.CINEMATIC = false;
+      });
 
     function initHyperlapse() {
 
@@ -132,27 +196,6 @@ this.loadBuffer(this.urlList[i],i);}
       var bobHeight = 20;
       var inc = 0;
 
-      function playSounds(ids, callback)  {
-        if (ids.length == 0) {
-          callback();
-          return;
-        }
-        var storyCurrentId = ids.shift();
-         var $story = $('#story-'+storyCurrentId)
-         var story = $story[0];
-          console.log('story', story)
-          story.play();
-          $story.on("ended", function(){
-            console.log('end');
-            playSounds(ids, callback);
-          });
-      }
-
-      $rootScope.CINEMATIC = true;
-      var ids = audioMap.start['0'].sounds;
-      playSounds(ids, function() {
-        $rootScope.CINEMATIC = false;
-      });
 
 
       function loop() {
@@ -169,7 +212,26 @@ this.loadBuffer(this.urlList[i],i);}
         if ($rootScope.CINEMATIC == false) {
           var l = $rootScope.progress;
           var d = $rootScope.darkness;
+          if (lightorder.length > 0 && l > lightorder[0]) {
+              var ll = lightorder.shift();
+              $rootScope.CINEMATIC = true;
+              playSounds(audioMap.light[ll.toString()].sounds, function() {
+                $rootScope.CINEMATIC = false;
+              });
+          }
+        }
+          // } else if (darkorder.length > 0 && l > darkorder[0]) {
+          //   var ll = darkorder.shift();
+          //     $rootScope.CINEMATIC = true;
+          //     playSounds(audioMap.dark[ll.toString()].sounds, function() {
+          //       $rootScope.CINEMATIC = false;
+          //     });
+          //   }
+          // }
+        // }
 
+        if ($rootScope.CINEMATIC) {
+          darkgain.gain.value = 0.3;
         }
 
 
@@ -213,35 +275,10 @@ this.loadBuffer(this.urlList[i],i);}
     var storyCurrentId = 1;
     var played = [];
 
-    var audioMap = {
-      'start': {
-        '0': {
-          sounds: [1,2,3,4,5,6,7,8,9,10]
-        },
-      },
-      'light': {
-        '.5': {
-          sounds: []
-        },
-        '.75': {
-          sounds: []
-        },
-        '1': {
-          sounds: []
-        }
-      },
-      'dark': {
-        '.5': {
-          sounds: []
-        },
-        '.75': {
-          sounds: []
-        },
-        '1': {
-          sounds: []
-        }
-      },
-    }
+    var lightorder = [.25, .5, .75, 1];
+    var darkorder = [.25, .5, .75, 1];
+
+   
     
 
     start();
