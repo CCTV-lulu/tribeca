@@ -12,10 +12,9 @@
 	<script src="third-party/Hyperlapse.js"></script>
 	<script> 
 	
-		var start_point = new google.maps.LatLng(44.3431,6.783936);
-		var end_point = new google.maps.LatLng(44.340578,6.782684);
-		var lookat_point = new google.maps.LatLng(44.34232747290594, 6.786460550292986);
-		var ma, directions_service, streetview_service, geocoder;
+		var start_point, end_point, lookat_point;
+
+		var ma, directions_service, streetview_service;
 
 		function getLocation() {
 			navigator.geolocation.getCurrentPosition( getDestination, alert );
@@ -28,11 +27,11 @@
 	      center: start_point,
 	      zoom: 13
 	    });
+
 			var searchRequest = {
 		    location: start_point,
 		    //radius: 10000,
 		    types: ['funeral_home', 'cemetery'],
-		    keyword: 'chelsea',
 		    rankBy: google.maps.places.RankBy.DISTANCE
 		  };
 			service = new google.maps.places.PlacesService(map);
@@ -65,8 +64,6 @@
 				center: start_point,
 				zoom: 15
 			};
-
-			geocoder = new google.maps.Geocoder();
 
 			var overlay = new google.maps.StreetViewCoverageLayer();
 			overlay.setMap(map);
