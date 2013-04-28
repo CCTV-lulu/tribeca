@@ -212,6 +212,7 @@ this.loadBuffer(this.urlList[i],i);}
         if ($rootScope.CINEMATIC == false) {
           var l = $rootScope.progress;
           var d = $rootScope.darkness;
+              
           if (lightorder.length > 0 && l >= lightorder[0]) {
               var ll = lightorder.shift();
               $rootScope.CINEMATIC = true;

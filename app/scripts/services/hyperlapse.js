@@ -76,7 +76,7 @@ angular.module('clientApp')
       zoom: 2,
       use_lookat: false,
       distance_between_points: 2,
-      max_points: 10,
+      max_points: 150,
       material: $rootScope.material
     });
 
@@ -100,6 +100,7 @@ angular.module('clientApp')
 
     $rootScope.hyperlapse.onFrame = function(e) {
       var progress = (e.position+1)/$rootScope.hyperlapse.length();
+      $rootScope.progress = progress;
       $rootScope.material.uniforms.progress.value = progress;
       $rootScope.material.uniforms.lightness.value = progress/2;
       if (progress >= 1) {
@@ -109,12 +110,13 @@ angular.module('clientApp')
 
     $rootScope.timeStart = new Date().getTime()/1000;
     $rootScope.timeNow = new Date().getTime()/1000;
-    $rootScope.timeToDie = 180;
+    $rootScope.timeToDie = 70;
 
     $rootScope.hyperlapse.onAnimate = function() {
       $rootScope.timeNow = new Date().getTime()/1000;
       $rootScope.material.uniforms.time.value = $rootScope.timeNow - $rootScope.timeStart;
       var dark = ($rootScope.timeNow - $rootScope.timeStart)/$rootScope.timeToDie;
+      $rootScope.darkness = dark;
       $rootScope.material.uniforms.darkness.value = dark * 2;
       if (dark >= 1) {
         END();
