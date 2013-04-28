@@ -13,14 +13,6 @@ angular.module('clientApp', [])
       }]
     };
 
-    /**
-     * Gets the microphone!
-     */
-    var getBar = function() {
-      microphone.unbind('start', getBar);//.stop();
-    }
-    microphone.bind('start', getBar).start();
-
     $routeProvider
       .when('/', {
         templateUrl: 'views/main.html',
