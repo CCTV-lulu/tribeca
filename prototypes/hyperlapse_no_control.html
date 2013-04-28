@@ -28,6 +28,9 @@
 		var ma, directions_service, streetview_service;
 		var ready = false, timeout = 1000 / 12;
 
+		var timeStart = new Date().getTime()/1000;
+		var timeToDie = 60;
+
 		function getLocation() {
 			navigator.geolocation.getCurrentPosition( getDestination, alert );
 		}
@@ -54,43 +57,27 @@
 		function getRoute( results, status ) {
 			if (status == google.maps.places.PlacesServiceStatus.OK) {
 		    end_point = results[0].geometry.location;
-		    lookat_point = results[0].geometry.location;
-				initMaps();
 				initHyperlapse();
 		  } else {
 		  	alert("can't find route");
 		  }
 		}
 
-		function initMaps() {
-			function snapToRoad(point, callback) {
-				var request = { origin: point, destination: point, travelMode: google.maps.TravelMode["DRIVING"] };
-				directions_service.route(request, function(response, status) {
-					if(status=="OK") callback(response.routes[0].overview_path[0]);
-					else callback(null);
-				});
-			}
-
-			var mapOpt = { 
-				mapTypeId: google.maps.MapTypeId.ROADMAP,
-				center: start_point,
-				zoom: 15
-			};
-
-			var overlay = new google.maps.StreetViewCoverageLayer();
-			overlay.setMap(map);
+		function initHyperlapse() {
 
 			directions_service = new google.maps.DirectionsService();
 
-		}
-
-		function initHyperlapse() {
-
+			var lutTexture = THREE.ImageUtils.loadTexture( "LUT1.png" );
+			lutTexture.magFilter = THREE.NearestFilter;
+			lutTexture.minFilter = THREE.NearestFilter;
+			lutTexture.m
 			uniforms = {
 					map: { type: "t", value: null },
+					LUT: { type: "t", value: lutTexture },
 					progress: { type: "f", value: null},
 					lightness: { type: "f", value: 0},
-					darkness: { type: "f", value: 0}
+					darkness: { type: "f", value: 0},
+					time: { type: "f", value: 0}
 			};
 
 			var material = material = new THREE.ShaderMaterial( {
@@ -141,26 +128,36 @@
 				material.uniforms.lightness.value = progress;
 			};
 
-      pano.addEventListener('mousemove', function(e) {
+			hyperlapse.onAnimate = function() {
+				var timeNow = new Date().getTime()/1000;
+				material.uniforms.time.value = timeNow - timeStart;
+				material.uniforms.darkness.value = (timeNow - timeStart)/timeToDie/2;
+			};
 
-        if (!hyperlapse) {
-          return;
-        }
-
-        var f = hyperlapse.fov() / 500;
-        var dx = (e.webkitMovementX) * f;
-        var dy = (e.webkitMovementY) * f;
-
-        var px = (e.clientX / window.innerWidth) - 0.5;
-        var py = (e.clientY / window.innerHeight) - 0.5;
-        hyperlapse.position.x = px * 360;
-        hyperlapse.position.y = - py * 90;
-
-      });
+      // pano.addEventListener( 'mousedown', function(e){
+      // 
+      //         if (!hyperlapse) {
+      //           return;
+      //         }
+      // 
+      //         var f = hyperlapse.fov() / 500;
+      //         var dx = (e.webkitMovementX) * f;
+      //         var dy = (e.webkitMovementY) * f;
+      // 
+      //         var px = (e.clientX / window.innerWidth) - 0.5;
+      //         var py = (e.clientY / window.innerHeight) - 0.5;
+      //         hyperlapse.position.x = px * 360;
+      //         hyperlapse.position.y = - py * 90;
+      // 
+      //       });
 
       var cancelTimer = true;
 
-      pano.addEventListener('mousedown', function(e) {
+      pano.addEventListener('mousemove', function(e) {
+
+        if (!ready) {
+          return;
+        }
 
         var abs = Math.abs(hyperlapse.position.x);
         var isForward = abs < 45;
@@ -181,7 +178,7 @@
 
       function run(forward) {
 
-        if (!hyperlapse) {
+        if (!ready) {
           return;
         }
 
@@ -254,8 +251,6 @@
 
 			
 
-			/* Dat GUI */
-
 			var gui = new dat.GUI();
 
 			var o = {
@@ -315,7 +310,7 @@
 			play_controls.open();
 
       // gui.hide();
-      gui.domElement.style.display = 'none';
+      // gui.domElement.style.display = 'none';
 
 			window.addEventListener('resize', function(){
 				hyperlapse.setSize(window.innerWidth, window.innerHeight);
@@ -365,23 +360,63 @@
 
 		<script id="fragmentShader" type="x-shader/x-fragment">
 
+			precision highp float;
+
 			varying vec2 vUv;
 			varying vec3 vNormal;
 			uniform sampler2D map;
+			uniform sampler2D LUT;
+			uniform float time;
 			uniform float darkness;
 			uniform float lightness;
 
+			vec3 ColorLookupTable(vec3 InLDRColor)
+			{
+			      // requires a volume texture 16x16x16 unwrapped in a 2d texture 256x16
+			      // can be optimized by using a volume texture
+			      vec2 Offset = vec2(0.5 / 256.0, 0.5 / 16.0);
+			      float Scale = 15.0 / 16.0;
+
+			      // Also consider blur value in the blur buffer written by translucency
+			      float IntB = floor(InLDRColor.b * 14.9999) / 16.0;
+			      float FracB = InLDRColor.b * 15.0 - IntB * 16.0;
+
+			      float U = IntB + InLDRColor.r * Scale / 16.0;
+			      float V = InLDRColor.g * Scale;
+
+			      vec3 RG0 = texture2D(LUT, Offset + vec2(U             , 1.0-V)).rgb;
+			      vec3 RG1 = texture2D(LUT, Offset + vec2(U + 1.0 / 16.0, 1.0-V)).rgb;
+
+						RG0 = pow(RG0, vec3(0.9));
+						RG1 = pow(RG1, vec3(0.9));
+
+			      return mix(RG0, RG1, FracB);
+			}
+
+			float rand(vec3 co){
+			    return fract(sin(dot(co.xyz ,vec3(12.9898,78.233+time,44.937))) * 43758.5453);
+			}
+
+			float rand2(vec2 co, float freq) {
+				return sin(time*freq+dot(co.xy/freq*5. ,vec2(12.9898,78.233)));
+			}
+
 			void main()	{
 
-				vec3 tex = texture2D( map, vUv ).xyz;
-				float grayscale = (tex.r+tex.g+tex.b)/3.0;
-
-				float highlights = (grayscale-2.0/3.0);
-
 				float light = max((vNormal.x-1.0+lightness)*(4.*lightness),0.);
-				float dark = max((-vNormal.x-1.0+lightness)*(4.*lightness),0.);
+				float dark = max((-vNormal.x-1.0+darkness)*(4.*darkness),0.);
 
-				gl_FragColor = vec4(tex+light-dark, 1.0);
+				float r = rand2(vNormal.xy, 10.);
+				float r2 = rand2(vNormal.yz, 10.);
+				vec2 randUv = vec2( r*0.02, r2*0.02 );
+				randUv *= vec2(dark);
+
+				vec3 tex = texture2D( map, vUv + randUv ).xyz;
+				tex = ColorLookupTable(tex);
+
+				tex = tex+light-dark;
+
+				gl_FragColor = vec4(tex+vec3(rand(vNormal)*0.15), 1.0);
 
 			}
 

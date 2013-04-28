@@ -1,1 +1,4 @@
-/* Will be compiled down to a single stylesheet with your sass files */
+body {
+	background: #000;
+	color: #FFF;
+}

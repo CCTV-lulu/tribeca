@@ -504,6 +504,8 @@ var Hyperlapse = function(container, params) {
 			_dtime = 0;
 		}
 
+		if (self.onAnimate) self.onAnimate();
+
 		requestAnimationFrame( animate );
 		render();
 	};
