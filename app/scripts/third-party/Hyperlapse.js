@@ -176,6 +176,7 @@ var Hyperlapse = function(container, params) {
 
 	_camera = new THREE.PerspectiveCamera( _fov, _w/_h, 1, 1100 );
 	_camera.target = new THREE.Vector3( 0, 0, 0 );
+	this.camera = _camera;
 
 	_scene = new THREE.Scene();
 	_scene.add( _camera );
@@ -502,6 +503,8 @@ var Hyperlapse = function(container, params) {
 			if(_is_playing) loop();
 			_dtime = 0;
 		}
+
+		if (self.onAnimate) self.onAnimate();
 
 		requestAnimationFrame( animate );
 		render();
