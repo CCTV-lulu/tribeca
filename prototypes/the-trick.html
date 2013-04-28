@@ -53,7 +53,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-image: url(./images/bg.png);
+        background: url(./images/bg.png) center center;
       }
       #score {
         position: absolute;
@@ -137,7 +137,7 @@
 
         $(function() {
 
-          var _init = _.after(2, init);
+          var _init = _.after(3, init);
 
           moon = document.createElement('img');
           $(moon).bind('load', _init);
@@ -146,6 +146,10 @@
           star = document.createElement('img');
           $(star).bind('load', _init);
           star.src = './images/star.png';
+
+          wolf = document.createElement('img');
+          $(wolf).bind('load', _init);
+          wolf.src = './images/wolf.png';
 
         });
 
@@ -179,22 +183,40 @@
           ground.noStroke();
           ground.fill = '#5faf7c';
 
-          var heroHeight = 20;
+          var heroHeight = 60;
           var hero = two.makeRectangle(two.width / 2, two.height, heroHeight, heroHeight);
-          hero.height = heroHeight;
           hero.particle = physics.makeParticle(1.0, two.width / 2, two.height / 2);
           hero.particle.position = hero.translation;
           hero.noStroke().fill = 'black';
           hero.destination = new Two.Vector();
+
+          var dDiff = 74;
+          var nDiff = 30;
+          var frame = 1;
+          var frameCount = 12;
+
+          hero.image = wolf;
+          hero.width = 0;
+          hero.height = 0;
+
+          hero.dwidth = 100;
+          hero.dheight = 60;
+
+          hero.nx = 50;
+          hero.ny = 0;
+
+          hero.nwidth = 100;
+          hero.nheight = 60;
+
           hero.jump = function() {
-            this.particle.velocity.y = - heroHeight;
+            this.particle.velocity.y = - 20;
             if (game.started) {
               score.html(Math.round(parseInt(score.html()) + 10 * multiplier));
             }
             return this;
           };
 
-          ground.constraint = ground.translation.y - (ground.depth + hero.height) / 2;
+          ground.constraint = ground.translation.y - (ground.depth + heroHeight) / 2;
 
           var amount = 25;
           var summit = 0;
@@ -229,8 +251,31 @@
               var particle = hero.particle;
               var position = particle.position;
 
+              var delta = hero.destination.x - position.x;
+              var isLeft;
+
+              if (delta < 0) {
+                isLeft = false;
+              } else if (delta > 0) {
+                isLeft = true;
+              }
+
+              var step = 10;
+
               position.y = Math.min(ground.constraint, position.y);
-              position.x += (hero.destination.x - position.x) * 0.125;
+              if (Math.abs(delta) <= step) {
+                position.x = hero.destination.x;
+              } else if (delta < step) {
+                position.x -= 7;
+              } else if (delta > step) {
+                position.x += step;
+              }
+
+              if (Math.abs(delta) > 0.1) {
+                run(isLeft);
+              } else {
+                stand();
+              }
 
               _.each(jumps, function(jump, i) {
                 var dead = jump.update();
@@ -262,6 +307,25 @@
             $('#content').fadeIn();
           });
 
+          function stand() {
+            frame = 0;
+            updateFrame();
+          }
+
+          function run(isLeft) {
+            // Flip the stance
+            if (!_.isUndefined(isLeft)) {
+              hero.reflectY = !isLeft;
+            }
+            frame = (frame + 0.85) % frameCount;
+            updateFrame();
+          }
+
+          function updateFrame() {
+            hero.height = - dDiff * Math.floor(frame);
+            hero.ny = nDiff;
+          }
+
           function getHorizontal() {
             return two.width / 2 - (M.random() * two.width * 0.66 - two.width * 0.33);
           }
@@ -274,7 +338,11 @@
           function circleOfLife(i) {
             var x = getHorizontal();
             var y = getVertical();
+            jumps[i].visible = false;
             jumps[i].translation.set(x, y);
+            _.defer(function() {
+              jumps[i].visible = true;
+            });
           }
 
           function addJump(x, y, r) {
@@ -293,14 +361,13 @@
 
             var amount = 8;
             var particles = _.map(_.range(amount), function(i) {
-              
               var particle = two.makeCircle(0, 0, radius / (amount / 2));
               particle.visible = false;
               particle.noStroke().fill = color;
               particle.origin = new Two.Vector(x, y);
               particle.image = star;
-              particle.width = 25;
-              particle.height = 25;
+              particle.width = 12;
+              particle.height = 12;
               return particle;
             });
 
@@ -328,8 +395,11 @@
               })
               .onComplete(function() {
                 _.each(particles, function(p) {
-                  p.translation.clear();
                   p.visible = false;
+                  p.opacity = 0.0;
+                  _.defer(function() {
+                    p.translation.clear();
+                  });
                 });
                 callback();
               })
@@ -403,6 +473,13 @@
             game.ended = true;
           }
 
+        }
+
+        function mod(v, limit) {
+          while (v < 0) {
+            v += limit;
+          }
+          return v % limit;
         }
 
       </script>
