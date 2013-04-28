@@ -80,9 +80,9 @@
 	    	})
 	    },
 
-	    spawn:function(text) {
+	    spawn:function(text, selector) {
 	    	var spawn = $('<div/>').addClass('make-spooky').html(text);
-	    	$('.container').append(spawn);
+	    	$(selector || '.container').append(spawn);
 	    	app.spookify(spawn);
 	    },
 

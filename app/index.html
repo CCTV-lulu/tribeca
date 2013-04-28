@@ -12,6 +12,8 @@
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
     <!-- build:css styles/main.css -->
     <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/thegame.css">
+    <link rel="stylesheet" href="styles/spooky.css">
     <!-- endbuild -->
   </head>
   <body ng-app="clientApp">
@@ -27,6 +29,7 @@
     <!-- Add your site or application content here -->
     <div class="container" ng-view></div>
 
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places" type="text/javascript"></script> 
     <script src="components/angular/angular.js"></script>
     <script src="components/angular-resource/angular-resource.js"></script>
     <script src="components/angular-cookies/angular-cookies.js"></script>
@@ -38,7 +41,16 @@
     <script src="scripts/third-party/physics.js"></script>
     <script src="scripts/third-party/tween.js"></script>
     <script src="scripts/third-party/mersenne-twister.js"></script>
+    <script src="scripts/third-party/three.min.js"></script>
+    <script src="scripts/third-party/Hyperlapse.js"></script>
+    <script src="scripts/third-party/GSVPano.js"></script>
+    <script src="scripts/third-party/dat.gui.min.js"></script>
+    <script src="scripts/third-party/microphone.js"></script>
+    <script src="scripts/third-party/jquery.lettering.js"></script>
+    <script src="scripts/third-party/jquery.transit.min.js"></script>
 
+    <script src="scripts/third-party/askForMicrophone.js"></script>
+    <!-- // <script src="scripts/third-party/askForPosition.js"></script> -->
     <script src="scripts/app.js"></script>
     <script src="scripts/controllers/main.js"></script>
     <script src="scripts/controllers/3daudio.js"></script>
@@ -50,6 +62,9 @@
     <script src="scripts/controllers/lupus.js"></script>
     <script src="scripts/controllers/happywolfyfuntimeandrainbow.js"></script>
     <script src="scripts/directives/spooky.js"></script>
+    <script src="scripts/controllers/thegame.js"></script>
+    <script src="scripts/controllers/death.js"></script>
+    <script src="scripts/services/hyperlapse.js"></script>
     <!-- endbuild -->
 
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->

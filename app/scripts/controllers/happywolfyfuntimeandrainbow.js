@@ -2,7 +2,9 @@
 
 angular.module('clientApp')
   .controller('HappywolfyfuntimeandrainbowCtrl', function ($scope, $location) {
- var moon, wolf, star;
+
+        var moon, wolf, star;
+        var BONUS = 1000;
 
         $(function() {
 
@@ -340,7 +342,7 @@ angular.module('clientApp')
           function updateScore() {
           	var points = Math.round(parseInt(score.html()) + 10 * multiplier);
             score.html(points);
-            if (!offered && points > 10) {
+            if (!offered && points > BONUS) {
             	theoffer();
             	offered = true;
             }
@@ -368,16 +370,20 @@ angular.module('clientApp')
         	physics.pause();
         	$scope.offer = true;
         	$scope.$apply();
+        	$('#content').css('-webkit-filter', 'blur(10px)');
         }
+
+         // $scope.offer = true;
+        //$scope.$apply();
 
         $scope.agree = function() {
         	$scope.offer = false;
-        	$location.path("thegame")
+        	$location.path("thegame");
         }
 
         $scope.disagree = function() {
-        	console.log("disagree");
         	physics.play();
         	$scope.offer = false;
+        	$('#content').css('-webkit-filter', 'none');
         }
     });
