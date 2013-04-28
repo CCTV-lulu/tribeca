@@ -58,10 +58,8 @@ angular.module('clientApp')
   	        });
 
           spook.bind('mouseover', function(){
-              console.log('over')
               $(this).children('.spooky-text').children('span').each(function(){ $(this).addClass('no-animate');});
           }).bind('mouseout', function(){
-              console.log('out')
               $(this).children('.spooky-text').children('span').each(function(){ $(this).removeClass('no-animate');});
           });
 

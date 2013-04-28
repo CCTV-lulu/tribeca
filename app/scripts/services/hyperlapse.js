@@ -107,8 +107,15 @@ angular.module('clientApp')
       $rootScope.timeNow = new Date().getTime()/1000;
       $rootScope.material.uniforms.time.value = $rootScope.timeNow - $rootScope.timeStart;
       var dark = ($rootScope.timeNow - $rootScope.timeStart)/$rootScope.timeToDie;
-      $rootScope.material.uniforms.darkness.value = dark*2;
+      $rootScope.material.uniforms.darkness.value = dark * 2;
+      if (dark === 1) {
+        DIE();
+      }
     };
+
+    var DIE = _.once(function() {
+      $rootScope.$broadcast('dead');
+    });
 
     var directions_service = new google.maps.DirectionsService();
 
