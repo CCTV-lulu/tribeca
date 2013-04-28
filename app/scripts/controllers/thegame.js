@@ -214,29 +214,35 @@ this.loadBuffer(this.urlList[i],i);}
     var audioMap = {
       'start': {
         '0': {
-          sounds: [1,2,3,4,5,6,7,8,9,10]
+          sounds: [1,2,3]
         },
       },
       'light': {
+        '.25': {
+          sounds: [4,7,8]
+        },
         '.5': {
-          sounds: []
+          sounds: [4,5]
         },
         '.75': {
-          sounds: []
+          sounds: [11,12,13]
         },
         '1': {
-          sounds: []
+          sounds: [14,15]
         }
       },
       'dark': {
+        '.25': {
+          sounds: [16,17]
+        },
         '.5': {
-          sounds: []
+          sounds: [18,19]
         },
         '.75': {
-          sounds: []
-        },
+          sounds: [20,21]
+        }
         '1': {
-          sounds: []
+          sounds: [22,23]
         }
       },
     }
