@@ -4,4 +4,6 @@ dist
 .sass-cache
 app/components
 .DS_Store
-app/audio/_highrese
+app/audio/_highres
+dialog
+
