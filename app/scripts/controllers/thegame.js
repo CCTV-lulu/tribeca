@@ -17,6 +17,7 @@ this.loadBuffer(this.urlList[i],i);}
     $rootScope.timeStart = new Date().getTime()/1000;
     $rootScope.timeNow = new Date().getTime()/1000;
     $rootScope.timeToDie = 60;
+    $rootScope.CINEMATIC = false;
 
     console.log('game starting');
 
@@ -82,6 +83,11 @@ this.loadBuffer(this.urlList[i],i);}
           return;
         }
 
+        if ($rootScope.CINEMATIC) {
+          return;
+        }
+
+
         var abs = Math.abs($rootScope.hyperlapse.position.x);
         var isForward = abs < 45;
         var isBackward = abs > 90;
@@ -144,6 +150,9 @@ this.loadBuffer(this.urlList[i],i);}
       function onKeyDown ( event ) {
         var key = event.keyCode;
         // console.log(key)
+        if ($rootScope.CINEMATIC) {
+          return;
+        }  
         if (key == 190 || key == 38 || key == 39 || key == 87 || key == 68 || key == 32) /* > */
           $rootScope.hyperlapse.next();
         if (key == 188 || key == 37 || key == 40 || key == 83 || key == 65 || key == 8) /* < */
