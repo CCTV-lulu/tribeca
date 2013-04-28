@@ -3,6 +3,8 @@
 angular.module('clientApp')
   .controller('ThegameCtrl', function ($scope) {
 
+    $(document.body).addClass('thegame');
+
     var start_point, end_point, lookat_point;
 
     var map, directions_service, streetview_service;
@@ -90,7 +92,6 @@ angular.module('clientApp')
         material: material
       });
       
-
       hyperlapse.onError = function(e) {
         console.log( "ERROR: "+ e.message );
       };
@@ -101,7 +102,9 @@ angular.module('clientApp')
 
       hyperlapse.onLoadComplete = function(e) {
         ready = true;
-        timeStart = new Date().getTime()/1000;
+        timeStart = new Date().getTime() / 1000;
+        $('#lobby').fadeOut(5000);
+        console.log('hyperlapse ready');
       };
 
       hyperlapse.onFrame = function(e) {
@@ -188,8 +191,6 @@ angular.module('clientApp')
           hyperlapse.camera.position.y = Math.sin(inc) * bobHeight;
           // hyperlapse.camera.position.z = Math.sin(inc) * bobHeight / 2;
           inc += 0.04;
-        } else if (!cancelTimer) {
-          accel = 0;
         }
 
         requestAnimationFrame(loop);
