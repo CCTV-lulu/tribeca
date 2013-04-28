@@ -162,7 +162,7 @@ this.loadBuffer(this.urlList[i],i);}
 
         if ($rootScope.CINEMATIC == false) {
           var l = $rootScope.progress;
-          var d = $rootscope.darkness;
+          var d = $rootScope.darkness;
 
         }
 
