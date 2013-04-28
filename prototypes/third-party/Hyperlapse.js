@@ -140,7 +140,8 @@ var Hyperlapse = function(container, params) {
 		_ctime = Date.now(),
 		_ptime = 0, _dtime = 0,
 		_prev_pano_id = null,
-		_raw_points = [], _h_points = [];
+		_raw_points = [], _h_points = [],
+		_material = _params.material || new THREE.MeshBasicMaterial();
 
 	/**
 	 * @event Hyperlapse#onError
@@ -178,6 +179,7 @@ var Hyperlapse = function(container, params) {
 
 	_scene = new THREE.Scene();
 	_scene.add( _camera );
+	this.scene = _scene;
 
 	try {
 		var isWebGL = !!window.WebGLRenderingContext && !!document.createElement('canvas').getContext('experimental-webgl');
@@ -191,8 +193,13 @@ var Hyperlapse = function(container, params) {
 
 	_mesh = new THREE.Mesh( 
 		new THREE.SphereGeometry( 500, 60, 40 ), 
-		new THREE.MeshBasicMaterial( { map: new THREE.Texture(), side: THREE.DoubleSide } ) 
+		_material 
 	);
+	_material.map = new THREE.Texture();
+	_mesh.material.side = THREE.DoubleSide;
+
+	_material.uniforms.map.value = _material.map;
+
 	_scene.add( _mesh );
 
 	_container.appendChild( _renderer.domElement );
@@ -430,6 +437,9 @@ var Hyperlapse = function(container, params) {
 	var drawMaterial = function() {
 		_mesh.material.map.image = _h_points[_point_index].image;
 		_mesh.material.map.needsUpdate = true;
+
+		// _mesh.material.uniforms.map.value = THREE.ImageUtils.loadTexture( "screenshot.png" );//_h_points[_point_index].image;
+		// _mesh.material.uniforms.map.needsUpdate = true;
 
 		_origin_heading = _h_points[_point_index].heading;
 		_origin_pitch = _h_points[_point_index].pitch;
