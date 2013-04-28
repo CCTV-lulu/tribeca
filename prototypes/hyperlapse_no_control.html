@@ -28,6 +28,9 @@
 		var ma, directions_service, streetview_service;
 		var cancelTimer = false;
 
+		var timeStart = new Date().getTime()/1000;
+		var timeToDie = 120;
+
 		function getLocation() {
 			navigator.geolocation.getCurrentPosition( getDestination, alert );
 		}
@@ -122,11 +125,12 @@
 				var progress = (e.position+1)/hyperlapse.length();
 				material.uniforms.progress.value = progress;
 				material.uniforms.lightness.value = progress;
-				material.uniforms.darkness.value = progress;
 			};
 
 			hyperlapse.onAnimate = function() {
-				material.uniforms.time.value += 1;
+				var timeNow = new Date().getTime()/1000;
+				material.uniforms.time.value = timeNow - timeStart;
+				material.uniforms.darkness.value = (timeNow - timeStart)/timeToDie/2;
 
 			}
 
@@ -248,7 +252,7 @@
 			play_controls.open();
 
       // gui.hide();
-      gui.domElement.style.display = 'none';
+      // gui.domElement.style.display = 'none';
 
 			window.addEventListener('resize', function(){
 				hyperlapse.setSize(window.innerWidth, window.innerHeight);
@@ -358,26 +362,26 @@
 			    return fract(sin(dot(co.xyz ,vec3(12.9898,78.233+time,44.937))) * 43758.5453);
 			}
 
+			float rand2(vec2 co, float freq) {
+				return sin(time*freq+dot(co.xy/freq*5. ,vec2(12.9898,78.233)));
+			}
+
 			void main()	{
-
-				vec3 tex = texture2D( map, vUv ).xyz;
-				// tex = pow(tex, vec3(2.2));
-				tex = ColorLookupTable(tex);
-				// tex = pow(tex, vec3(1.0/2.2));
-
-				// float grayscale = (tex.r+tex.g+tex.b)/3.0;
-
-				// float highlights = (grayscale-2.0/3.0);
-
 
 				float light = max((vNormal.x-1.0+lightness)*(4.*lightness),0.);
 				float dark = max((-vNormal.x-1.0+darkness)*(4.*darkness),0.);
 
+				float r = rand2(vNormal.xy, 10.);
+				float r2 = rand2(vNormal.yz, 10.);
+				vec2 randUv = vec2( r*0.02, r2*0.02 );
+				randUv *= vec2(dark);
+
+				vec3 tex = texture2D( map, vUv + randUv ).xyz;
+				tex = ColorLookupTable(tex);
+
 				tex = tex+light-dark;
 
 				gl_FragColor = vec4(tex+vec3(rand(vNormal)*0.15), 1.0);
-				// gl_FragColor = vec4(tex+light-dark, 1.0);
-				// gl_FragColor = vec4(tex, 1.0);
 
 			}
 
