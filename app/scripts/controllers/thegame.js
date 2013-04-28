@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('clientApp')
-  .controller('ThegameCtrl', function ($scope, $rootScope) {
+  .controller('ThegameCtrl', function ($scope, $rootScope, animatedParticles) {
 
     var ready = false, timeout = 1000 / 12, progress = 0;
 
@@ -14,6 +14,8 @@ angular.module('clientApp')
     function initHyperlapse() {
 
       /* Hyperlapse */
+
+      animatedParticles.add();
 
       var is_moving = false;
       var px, py;
