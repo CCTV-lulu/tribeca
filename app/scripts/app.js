@@ -15,6 +15,10 @@ angular.module('clientApp', [])
         templateUrl: 'views/saveaudio.html',
         controller: 'SaveaudioCtrl'
       })
+      .when('/audiodistort', {
+        templateUrl: 'views/audiodistort.html',
+        controller: 'AudiodistortCtrl'
+      })
       .otherwise({
         redirectTo: '/'
       });
