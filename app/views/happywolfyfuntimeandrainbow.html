@@ -105,6 +105,15 @@
       .scripts {
         display: none;
       }
+      #offer {
+      	text-align: center;
+        position: absolute;
+        top: 50%;
+        left: 0;
+        z-index: 9999;
+        width: 100%;
+        padding: 20px;
+      }
     </style>
     <div id="content">
       <div class="wrapper"></div>
@@ -116,5 +125,10 @@
           <br />
           <button>Play Again</button>
         </div>
+      </div>
+      <div id="offer" ng-show="offer">
+      	<button ng-click="agree()">Agree</button>
+      	&nbsp;
+      	<button ng-click="disagree()">Be a pussy</button>
       </div>
     </div>
