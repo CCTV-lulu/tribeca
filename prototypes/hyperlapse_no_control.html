@@ -26,7 +26,7 @@
 		var start_point, end_point, lookat_point;
 
 		var ma, directions_service, streetview_service;
-		var cancelTimer = false;
+		var ready = false, timeout = 1000 / 12;
 
 		function getLocation() {
 			navigator.geolocation.getCurrentPosition( getDestination, alert );
@@ -106,7 +106,8 @@
 			var pano = document.getElementById('pano');
 			var is_moving = false;
 			var px, py;
-			var onPointerDownPointerX = 0, onPointerDownPointerY = 0;
+      var onPointerDownPointerX = 0, onPointerDownPointerY = 0;
+      var offset = { x: 0, y: 0 };
 
 			var hyperlapse = new Hyperlapse(pano, {
 				lookat: lookat_point,
@@ -117,7 +118,7 @@
 				zoom: 2,
 				use_lookat: false,
 				distance_between_points: 2,
-				max_points: 5,
+				max_points: 100,
 				material: material
 			});
 			
@@ -131,7 +132,7 @@
 			};
 
 			hyperlapse.onLoadComplete = function(e) {
-          // hyperlapse.play();
+        ready = true;
 			};
 
 			hyperlapse.onFrame = function(e) {
@@ -140,64 +141,108 @@
 				material.uniforms.lightness.value = progress;
 			};
 
-			pano.addEventListener( 'mousedown', function(e){
+      pano.addEventListener('mousemove', function(e) {
 
-        /**
-         * New Controls
-         */
-
-        initializeTimer();
-
-        return;
-
-				e.preventDefault();
-
-				is_moving = true;
-
-				onPointerDownPointerX = e.clientX;
-				onPointerDownPointerY = e.clientY;
-
-				px = hyperlapse.position.x;
-				py = hyperlapse.position.y;
-
-			}, false );
-
-			pano.addEventListener( 'mousemove', function(e){
-
-        /**
-         * New Controls
-         */
-
-        return;
-
-				e.preventDefault();
-				var f = hyperlapse.fov() / 500;
-
-        if ( is_moving ) {
-					var dx = ( onPointerDownPointerX - e.clientX ) * f;
-					var dy = ( e.clientY - onPointerDownPointerY ) * f;
-					hyperlapse.position.x = px + dx; // reversed dragging direction (thanks @mrdoob!)
-					hyperlapse.position.y = py + dy;
-
-					o.position_x = hyperlapse.position.x;
-					o.position_y = hyperlapse.position.y;
+        if (!hyperlapse) {
+          return;
         }
-			}, false );
 
-			pano.addEventListener( 'mouseup', function(){
+        var f = hyperlapse.fov() / 500;
+        var dx = (e.webkitMovementX) * f;
+        var dy = (e.webkitMovementY) * f;
 
-        /**
-         * New Controls
-         */
+        var px = (e.clientX / window.innerWidth) - 0.5;
+        var py = (e.clientY / window.innerHeight) - 0.5;
+        hyperlapse.position.x = px * 360;
+        hyperlapse.position.y = - py * 90;
+
+      });
+
+      var cancelTimer = true;
+
+      pano.addEventListener('mousedown', function(e) {
+
+        cancelTimer = false;
+        run();
+
+      });
+
+      pano.addEventListener('mouseup', function(e) {
 
         cancelTimer = true;
 
-        return;
+      });
 
-				is_moving = false;
-				// hyperlapse.position.x = px;
-				// hyperlapse.position.y = py;
-			}, false );
+      function run() {
+
+        if (!hyperlapse) {
+          return;
+        }
+
+        hyperlapse.next();
+
+        if (!cancelTimer) {
+          _.delay(run, timeout);
+        }
+
+      }
+
+      var bobHeight = 20;
+      var inc = 0;
+
+      function loop() {
+
+        if (cancelTimer && hyperlapse.camera) {
+          // Bob the camera like panting
+          var cy = hyperlapse.camera.position.y;
+          hyperlapse.camera.position.y = Math.sin(inc) * bobHeight;
+          // hyperlapse.camera.position.z = Math.sin(inc) * bobHeight / 2;
+          inc += 0.04;
+        } else if (!cancelTimer) {
+          accel = 0;
+        }
+
+        requestAnimationFrame(loop);
+
+      }
+
+      loop();
+
+      // pano.addEventListener( 'mousedown', function(e){
+      //  e.preventDefault();
+      // 
+      //  is_moving = true;
+      // 
+      //  onPointerDownPointerX = e.clientX;
+      //  onPointerDownPointerY = e.clientY;
+      // 
+      //  px = hyperlapse.position.x;
+      //  py = hyperlapse.position.y;
+      // 
+      // }, false );
+      // 
+      // pano.addEventListener( 'mousemove', function(e){
+      //  e.preventDefault();
+      //  var f = hyperlapse.fov() / 500;
+      // 
+      //         if ( is_moving ) {
+      //    var dx = ( onPointerDownPointerX - e.clientX ) * f;
+      //    var dy = ( e.clientY - onPointerDownPointerY ) * f;
+      //    hyperlapse.position.x = px + dx; // reversed dragging direction (thanks @mrdoob!)
+      //    hyperlapse.position.y = py + dy;
+      // 
+      //    o.position_x = hyperlapse.position.x;
+      //    o.position_y = hyperlapse.position.y;
+      //         }
+      // }, false );
+      // 
+      // pano.addEventListener( 'mouseup', function(){
+      //  is_moving = false;
+      //  // hyperlapse.position.x = px;
+      //  // hyperlapse.position.y = py;
+      // }, false );
+
+			
 
 			/* Dat GUI */
 
@@ -284,29 +329,6 @@
 			};
 
 			o.generate();
-
-      function initializeTimer() {
-        accelerate();
-        cancelTimer = false;
-      }
-
-      function accelerate() {
-
-        if (!hyperlapse) {
-          return;
-        }
-
-        hyperlapse.next();
-
-        if (!cancelTimer) {
-          _.delay(requestAnimationFrame, getTimeout(accelAmount), accelerate);
-        }
-      }
-
-      function getTimeout(accelAmount) {
-        
-      }
-
 		}
 
 		window.onload = function() {
