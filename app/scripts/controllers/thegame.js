@@ -16,7 +16,6 @@ this.loadBuffer(this.urlList[i],i);}
 
     $rootScope.timeStart = new Date().getTime()/1000;
     $rootScope.timeNow = new Date().getTime()/1000;
-    $rootScope.timeToDie = 180;
     $rootScope.CINEMATIC = false;
 
     console.log('game starting');
