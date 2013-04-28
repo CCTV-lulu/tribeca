@@ -19,6 +19,14 @@ angular.module('clientApp', [])
         templateUrl: 'views/audiodistort.html',
         controller: 'AudiodistortCtrl'
       })
+      .when('/lupus', {
+        templateUrl: 'views/lupus.html',
+        controller: 'LupusCtrl'
+      })
+      .when('/happywolfyfuntimeandrainbow', {
+        templateUrl: 'views/happywolfyfuntimeandrainbow.html',
+        controller: 'HappywolfyfuntimeandrainbowCtrl'
+      })
       .otherwise({
         redirectTo: '/'
       });
