@@ -92,6 +92,9 @@ angular.module('clientApp')
       var progress = (e.position+1)/$rootScope.hyperlapse.length();
       $rootScope.material.uniforms.progress.value = progress;
       $rootScope.material.uniforms.lightness.value = progress/2;
+      if (progress >= 1) {
+        END();
+      }
     };
 
     $rootScope.timeStart = new Date().getTime()/1000;
@@ -103,13 +106,13 @@ angular.module('clientApp')
       $rootScope.material.uniforms.time.value = $rootScope.timeNow - $rootScope.timeStart;
       var dark = ($rootScope.timeNow - $rootScope.timeStart)/$rootScope.timeToDie;
       $rootScope.material.uniforms.darkness.value = dark * 2;
-      if (dark === 1) {
-        DIE();
+      if (dark >= 1) {
+        END();
       }
     };
 
-    var DIE = _.once(function() {
-      $rootScope.$broadcast('dead');
+    var END = _.once(function() {
+      $rootScope.$broadcast('end');
     });
 
     var directions_service = new google.maps.DirectionsService();
