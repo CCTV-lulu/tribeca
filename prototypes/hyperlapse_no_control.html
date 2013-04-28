@@ -162,8 +162,16 @@
 
       pano.addEventListener('mousedown', function(e) {
 
-        cancelTimer = false;
-        run();
+        var abs = Math.abs(hyperlapse.position.x);
+        var isForward = abs < 45;
+        var isBackward = abs > 90;
+
+        console.log(abs);
+
+        if (isForward || isBackward) {
+          cancelTimer = false;
+          run(isForward);
+        }
 
       });
 
@@ -173,16 +181,20 @@
 
       });
 
-      function run() {
+      function run(forward) {
 
         if (!hyperlapse) {
           return;
         }
 
-        hyperlapse.next();
+        if (forward) {
+          hyperlapse.next();
+        } else {
+          hyperlapse.prev();
+        }
 
         if (!cancelTimer) {
-          _.delay(run, timeout);
+          _.delay(run, timeout, forward);
         }
 
       }
