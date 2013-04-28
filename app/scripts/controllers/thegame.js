@@ -72,13 +72,13 @@ this.loadBuffer(this.urlList[i],i);}
         },
       },
       'light': {
-        '.25': {
+        '0.25': {
           sounds: [4,7,8]
         },
-        '.5': {
+        '0.5': {
           sounds: [5,6]
         },
-        '.75': {
+        '0.75': {
           sounds: [11,12,13]
         },
         '1': {
@@ -86,13 +86,13 @@ this.loadBuffer(this.urlList[i],i);}
         }
       },
       'dark': {
-        '.25': {
+        '0.25': {
           sounds: [16,17]
         },
-        '.5': {
+        '0.5': {
           sounds: [18,19]
         },
-        '.75': {
+        '0.75': {
           sounds: [20,21]
         },
         '1': {
@@ -210,23 +210,21 @@ this.loadBuffer(this.urlList[i],i);}
         if ($rootScope.CINEMATIC == false) {
           var l = $rootScope.progress;
           var d = $rootScope.darkness;
-          if (lightorder.length > 0 && l > lightorder[0]) {
+          if (lightorder.length > 0 && l >= lightorder[0]) {
               var ll = lightorder.shift();
               $rootScope.CINEMATIC = true;
+              console.log(ll, lightorder, l);
               playSounds(audioMap.light[ll.toString()].sounds, function() {
+                $rootScope.CINEMATIC = false;
+              });
+          } else if (darkorder.length > 0 && d >= darkorder[0]) {
+            var ll = darkorder.shift();
+              $rootScope.CINEMATIC = true;
+              playSounds(audioMap.dark[ll.toString()].sounds, function() {
                 $rootScope.CINEMATIC = false;
               });
           }
         }
-          // } else if (darkorder.length > 0 && l > darkorder[0]) {
-          //   var ll = darkorder.shift();
-          //     $rootScope.CINEMATIC = true;
-          //     playSounds(audioMap.dark[ll.toString()].sounds, function() {
-          //       $rootScope.CINEMATIC = false;
-          //     });
-          //   }
-          // }
-        // }
 
         if ($rootScope.CINEMATIC) {
           darkgain.gain.value = 0.3;
