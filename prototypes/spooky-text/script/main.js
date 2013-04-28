@@ -1,5 +1,6 @@
-var app = {
+(function(){
 
+	var app = {
 		_fonts: [
 			"Nightbird", "Face Your Fears", "Brain Flower", "Bloody", "Crimes Six", "Frankentype", "Monsterama"
 		],
@@ -92,3 +93,6 @@ var app = {
 	};
 
 	app.init();
+
+	window.spawn = app.spawn;
+})()

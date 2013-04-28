@@ -3365,6 +3365,16 @@ var Backbone = Backbone || {};
         ctx.globalAlpha = opacity;
       }
 
+      if (this.image) {
+        var array = [this.image, -this.width, -this.height];
+        if (this.dwidth && this.dheight) {
+          array = [this.image, -this.width, -this.height, this.dwidth, this.dheight, -this.nx, -this.ny, this.nwidth, this.nheight];
+        }
+        ctx.drawImage.apply(ctx, array);
+        ctx.restore();
+        return;
+      }
+
       ctx.beginPath();
       _.each(commands, function(b, i) {
 
@@ -4410,7 +4420,7 @@ var Backbone = Backbone || {};
       var transform = this._matrix
         .identity()
         .translate(this.translation.x, this.translation.y)
-        .scale(this.scale)
+        .scale(this.scale * this.reflectY, this.scale)
         .rotate(this.rotation);
       this.trigger(Two.Events.change, this.id, 'matrix', transform, this.scale);
     }, this), 0);
@@ -4439,9 +4449,20 @@ var Backbone = Backbone || {};
       }
     });
 
+    Object.defineProperty(this, 'reflectY', {
+      get: function() {
+        return this._reflectY ? 1.0 : -1.0;
+      },
+      set: function(b) {
+        this._reflectY = !!b;
+        updateMatrix();
+      }
+    });
+
     this.translation = new Two.Vector();
     this.rotation = 0.0;
     this.scale = 1.0;
+    this.reflectY = 1.0;
 
     this.translation.bind(Two.Events.change, updateMatrix);
 
@@ -4468,6 +4489,15 @@ var Backbone = Backbone || {};
   _.extend(Shape, {
 
     Properties: [
+      'image',
+      'width',
+      'height',
+      'dwidth',
+      'dheight',
+      'nx',
+      'ny',
+      'nwidth',
+      'nheight',
       'fill',
       'stroke',
       'linewidth',

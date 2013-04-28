@@ -3,18 +3,30 @@
 <head> 
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/> 
 	<title>Viewer Example</title> 
+  <style>
 
-	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places" type="text/javascript">
-	</script> 
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+  </style>
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places" type="text/javascript"></script> 
 	<script src="third-party/dat.gui.min.js"></script>
 	<script src="third-party/three.min.js"></script>
 	<script src="third-party/GSVPano.js"></script>
 	<script src="third-party/Hyperlapse.js"></script>
+	<script src="third-party/underscore.js"></script>
 	<script> 
 	
 		var start_point, end_point, lookat_point;
 
 		var ma, directions_service, streetview_service;
+		var cancelTimer = false;
 
 		function getLocation() {
 			navigator.geolocation.getCurrentPosition( getDestination, alert );
@@ -52,17 +64,17 @@
 
 			directions_service = new google.maps.DirectionsService();
 
-			var lutTexture = THREE.ImageUtils.loadTexture( "LUT0.png" );
+			var lutTexture = THREE.ImageUtils.loadTexture( "LUT1.png" );
 			lutTexture.magFilter = THREE.NearestFilter;
 			lutTexture.minFilter = THREE.NearestFilter;
-			//, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.NearestFilter, THREE.NearestFilter
 			lutTexture.m
 			uniforms = {
 					map: { type: "t", value: null },
 					LUT: { type: "t", value: lutTexture },
 					progress: { type: "f", value: null},
 					lightness: { type: "f", value: 0},
-					darkness: { type: "f", value: 0}
+					darkness: { type: "f", value: 0},
+					time: { type: "f", value: 0}
 			};
 
 			var material = material = new THREE.ShaderMaterial( {
@@ -78,7 +90,7 @@
 			var pano = document.getElementById('pano');
 			var is_moving = false;
 			var px, py;
-			var onPointerDownPointerX=0, onPointerDownPointerY=0;
+			var onPointerDownPointerX = 0, onPointerDownPointerY = 0;
 
 			var hyperlapse = new Hyperlapse(pano, {
 				lookat: lookat_point,
@@ -103,7 +115,7 @@
 			};
 
 			hyperlapse.onLoadComplete = function(e) {
-					hyperlapse.play();
+          // hyperlapse.play();
 			};
 
 			hyperlapse.onFrame = function(e) {
@@ -113,7 +125,21 @@
 				material.uniforms.darkness.value = progress;
 			};
 
+			hyperlapse.onAnimate = function() {
+				material.uniforms.time.value += 1;
+
+			}
+
 			pano.addEventListener( 'mousedown', function(e){
+
+        /**
+         * New Controls
+         */
+
+        initializeTimer();
+
+        return;
+
 				e.preventDefault();
 
 				is_moving = true;
@@ -127,10 +153,17 @@
 			}, false );
 
 			pano.addEventListener( 'mousemove', function(e){
+
+        /**
+         * New Controls
+         */
+
+        return;
+
 				e.preventDefault();
 				var f = hyperlapse.fov() / 500;
 
-				if ( is_moving ) {
+        if ( is_moving ) {
 					var dx = ( onPointerDownPointerX - e.clientX ) * f;
 					var dy = ( e.clientY - onPointerDownPointerY ) * f;
 					hyperlapse.position.x = px + dx; // reversed dragging direction (thanks @mrdoob!)
@@ -138,10 +171,19 @@
 
 					o.position_x = hyperlapse.position.x;
 					o.position_y = hyperlapse.position.y;
-				}
+        }
 			}, false );
 
 			pano.addEventListener( 'mouseup', function(){
+
+        /**
+         * New Controls
+         */
+
+        cancelTimer = true;
+
+        return;
+
 				is_moving = false;
 				// hyperlapse.position.x = px;
 				// hyperlapse.position.y = py;
@@ -205,6 +247,9 @@
 			play_controls.add(hyperlapse, 'prev');
 			play_controls.open();
 
+      // gui.hide();
+      gui.domElement.style.display = 'none';
+
 			window.addEventListener('resize', function(){
 				hyperlapse.setSize(window.innerWidth, window.innerHeight);
 				o.screen_width = window.innerWidth;
@@ -227,6 +272,29 @@
 			};
 
 			o.generate();
+
+      function initializeTimer() {
+        accelerate();
+        cancelTimer = false;
+      }
+
+      function accelerate() {
+
+        if (!hyperlapse) {
+          return;
+        }
+
+        hyperlapse.next();
+
+        if (!cancelTimer) {
+          _.delay(requestAnimationFrame, getTimeout(accelAmount), accelerate);
+        }
+      }
+
+      function getTimeout(accelAmount) {
+        
+      }
+
 		}
 
 		window.onload = function() {
@@ -253,10 +321,13 @@
 
 		<script id="fragmentShader" type="x-shader/x-fragment">
 
+			precision highp float;
+
 			varying vec2 vUv;
 			varying vec3 vNormal;
 			uniform sampler2D map;
 			uniform sampler2D LUT;
+			uniform float time;
 			uniform float darkness;
 			uniform float lightness;
 
@@ -277,37 +348,36 @@
 			      vec3 RG0 = texture2D(LUT, Offset + vec2(U             , 1.0-V)).rgb;
 			      vec3 RG1 = texture2D(LUT, Offset + vec2(U + 1.0 / 16.0, 1.0-V)).rgb;
 
-				RG0 = pow(RG0, vec3(0.9));
-				RG1 = pow(RG1, vec3(0.9));
-
+						RG0 = pow(RG0, vec3(0.9));
+						RG1 = pow(RG1, vec3(0.9));
 
 			      return mix(RG0, RG1, FracB);
 			}
 
 			float rand(vec3 co){
-			    return fract(sin(dot(co.xyz ,vec3(12.9898,78.233,44.937))) * 43758.5453);
+			    return fract(sin(dot(co.xyz ,vec3(12.9898,78.233+time,44.937))) * 43758.5453);
 			}
 
 			void main()	{
 
 				vec3 tex = texture2D( map, vUv ).xyz;
-				// tex = pow(tex, vec3(1.0/2.2));
-				tex = ColorLookupTable(tex);
 				// tex = pow(tex, vec3(2.2));
+				tex = ColorLookupTable(tex);
+				// tex = pow(tex, vec3(1.0/2.2));
 
 				// float grayscale = (tex.r+tex.g+tex.b)/3.0;
 
 				// float highlights = (grayscale-2.0/3.0);
 
 
-				// float light = max((vNormal.x-1.0+lightness)*(4.*lightness),0.);
-				// float dark = max((-vNormal.x-1.0+darkness)*(4.*darkness),0.);
+				float light = max((vNormal.x-1.0+lightness)*(4.*lightness),0.);
+				float dark = max((-vNormal.x-1.0+darkness)*(4.*darkness),0.);
 
-				// tex = tex+light-dark;
+				tex = tex+light-dark;
 
-				// gl_FragColor = vec4(tex+vec3(rand(vNormal)*0.1), 1.0);
+				gl_FragColor = vec4(tex+vec3(rand(vNormal)*0.15), 1.0);
 				// gl_FragColor = vec4(tex+light-dark, 1.0);
-				gl_FragColor = vec4(tex, 1.0);
+				// gl_FragColor = vec4(tex, 1.0);
 
 			}
 
