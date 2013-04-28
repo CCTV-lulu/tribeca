@@ -65,6 +65,7 @@ angular.module('clientApp')
       } );
 
     $rootScope.pano = document.getElementById('pano');
+    $rootScope.pano.style.display = 'none';
 
     $rootScope.hyperlapse = new Hyperlapse($rootScope.pano, {
       lookat: $rootScope.end_point,
@@ -75,13 +76,17 @@ angular.module('clientApp')
       zoom: 2,
       use_lookat: false,
       distance_between_points: 2,
-      max_points: 100,
+      max_points: 10,
       material: $rootScope.material
     });
 
     $rootScope.hyperlapse.onRouteComplete = function(e) {
       $rootScope.hyperlapse.load();
-      $rootScope.pano.style.display = 'none';
+    };
+
+    $rootScope.hyperlapse.onLoadComplete = function(e) {
+      $rootScope.PANOREADY = true;
+      console.log('paneready');
     };
 
     $rootScope.hyperlapse.onError = function(e) {
