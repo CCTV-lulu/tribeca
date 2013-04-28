@@ -51,9 +51,6 @@ angular.module('clientApp')
 
         function init() {
 
-
-        
-
           var M = new MersenneTwister();
 
           var game = {
@@ -436,7 +433,7 @@ angular.module('clientApp')
 
         $scope.agree = function() {
         	var offer = $('#00-offer-intro')[0];
-        	offer.stop();
+        	offer.pause();
         	$scope.offer = false;
         	$location.path("thegame");
         }

@@ -76,7 +76,7 @@ angular.module('clientApp')
       zoom: 2,
       use_lookat: false,
       distance_between_points: 2,
-      max_points: 10,
+      max_points: 100,
       material: $rootScope.material
     });
 
@@ -85,8 +85,13 @@ angular.module('clientApp')
     };
 
     $rootScope.hyperlapse.onLoadComplete = function(e) {
-      $rootScope.PANOREADY = true;
+      
       console.log('paneready');
+      $rootScope.PANOREADY = true;
+      $('#pano').fadeIn(10000, function(){
+        console.log('fade complete');
+      });
+
     };
 
     $rootScope.hyperlapse.onError = function(e) {
