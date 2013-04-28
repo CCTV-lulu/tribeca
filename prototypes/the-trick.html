@@ -211,7 +211,7 @@
           hero.jump = function() {
             this.particle.velocity.y = - 20;
             if (game.started) {
-              score.html(Math.round(parseInt(score.html()) + 10 * multiplier));
+              updateScore();
             }
             return this;
           };
@@ -463,6 +463,10 @@
                 circleOfLife(i);
               }
             });
+          }
+
+          function updateScore() {
+            score.html(Math.round(parseInt(score.html()) + 10 * multiplier));
           }
 
           function endGame() {
