@@ -31,7 +31,7 @@ angular.module('clientApp')
 
   	    	var spook = $('<div/>').addClass('spooky-wrap');
   	    	var face = app._fonts[Math.floor(Math.random()*app._fonts.length)];
-  	    	console.log(face);
+  	    	
   	    	el
   	    		.addClass('spooky-text')
   	    		.removeClass('make-spooky')
@@ -57,29 +57,53 @@ angular.module('clientApp')
   	            else app.jitter(jqLtr, index, true);
   	        });
 
+          spook.bind('mouseover', function(){
+              console.log('over')
+              $(this).children('.spooky-text').children('span').each(function(){ $(this).addClass('no-animate');});
+          }).bind('mouseout', function(){
+              console.log('out')
+              $(this).children('.spooky-text').children('span').each(function(){ $(this).removeClass('no-animate');});
+          });
+
   	    },
 
   	    jitter:function(jqLtr, index, first) {
             var delay = (first) ? (index*100) + 1000 : 0;
   	    	_.defer(function(){
   	    		var ref = jqLtr;
-  		    	jqLtr.transition({
-  	                rotate: app.range(-15, 15)+'deg',
-  	                rotateY: app.range(-45, 45)+'deg',
-  	                opacity: app.range(.5, 1),
-  	                translate: [app.range(-2, 2), app.range(-6, 6)],
-  	                duration: app.range(1000, 2000),
-  	                easing: 'linear',
-  	                '-webkit-filter': 'blur(' + app.range(0, 5) + 'px)',
-  	                delay: delay,
-  	                complete: function() { app.jitter(ref, 0, false)}
-  		   		});
+            if (jqLtr.hasClass('no-animate')) {
+              jqLtr.transition({
+                      rotate: '0deg',
+                      rotateY: '0deg',
+                      opacity: 1,
+                      translate: [0,0],
+                      duration: 150,
+                      easing: 'linear',
+                      '-webkit-filter': 'blur(0px)',
+                      delay: 0,
+                      complete: function() { app.jitter(ref, 0, false)}
+              });
+
+            } else {
+    		    	jqLtr.transition({
+    	                rotate: app.range(-15, 15)+'deg',
+    	                rotateY: app.range(-45, 45)+'deg',
+    	                opacity: app.range(.5, 1),
+    	                translate: [app.range(-2, 2), app.range(-6, 6)],
+    	                duration: app.range(1000, 2000),
+    	                easing: 'linear',
+    	                '-webkit-filter': 'blur(' + app.range(0, 5) + 'px)',
+    	                delay: delay,
+    	                complete: function() { app.jitter(ref, 0, false)}
+    		   		});
+            }
   	    	})
   	    },
 
   	    spawn:function(text, selector) {
   	    	var spawn = $('<div/>').addClass('make-spooky').html(text);
   	    	var $el = $(selector || '.container');
+
   	    	$el.children().hide();
   	    	_.defer(function() {
   	    	  $el.append(spawn);

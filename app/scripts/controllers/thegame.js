@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('clientApp')
-  .controller('ThegameCtrl', function ($scope) {
+  .controller('ThegameCtrl', function ($scope, $rootScope) {
 
     $(document.body).addClass('thegame');
 
@@ -13,38 +13,6 @@ angular.module('clientApp')
     var timeStart = new Date().getTime()/1000;
     var timeNow = new Date().getTime()/1000;
     var timeToDie = 60;
-
-    function getLocation() {
-      navigator.geolocation.getCurrentPosition( getDestination, alert );
-    }
-
-    function getDestination(position) {
-      start_point = new google.maps.LatLng( position.coords.latitude, position.coords.longitude );
-      map = new google.maps.Map(document.createElement("div"), {
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
-        center: start_point,
-        zoom: 13
-      });
-
-      var searchRequest = {
-        location: start_point,
-        //radius: 10000,
-        types: ['funeral_home', 'cemetery'],
-        rankBy: google.maps.places.RankBy.DISTANCE
-      };
-      var service = new google.maps.places.PlacesService(map);
-      service.nearbySearch(searchRequest, getRoute);
-      // service.textSearch(searchRequest, getRoute);
-    }
-
-    function getRoute( results, status ) {
-      if (status == google.maps.places.PlacesServiceStatus.OK) {
-        end_point = results[0].geometry.location;
-        initHyperlapse();
-      } else {
-        alert("can't find route");
-      }
-    }
 
     function initHyperlapse() {
 
@@ -88,7 +56,7 @@ angular.module('clientApp')
         zoom: 2,
         use_lookat: false,
         distance_between_points: 2,
-        max_points: 100,
+        max_points: 10,
         material: material
       });
       
@@ -105,6 +73,9 @@ angular.module('clientApp')
         timeStart = new Date().getTime() / 1000;
         $('#lobby').fadeOut(5000);
         console.log('hyperlapse ready');
+        hyperlapse.next();
+        hyperlapse.prev();
+        timeStart = new Date().getTime()/1000;
       };
 
       hyperlapse.onFrame = function(e) {
@@ -117,7 +88,7 @@ angular.module('clientApp')
         timeNow = new Date().getTime()/1000;
         material.uniforms.time.value = timeNow - timeStart;
         var dark = (timeNow - timeStart)/timeToDie;
-        material.uniforms.darkness.value = Math.pow(dark,(1+progress*2));
+        material.uniforms.darkness.value = dark*2;
       };
 
       pano.addEventListener('mousemove', function(e){
@@ -290,6 +261,6 @@ angular.module('clientApp')
       o.generate();
     }
 
-    getLocation();
+    initHyperlapse();
 
   });

@@ -56,8 +56,9 @@ angular.module('clientApp', [])
       .otherwise({
         redirectTo: '/'
       });
-  }).run(function($rootScope) {
+  }).run(function($rootScope, hyperlapse) {
     $rootScope.$on('$routeChangeStart', function() {
       $('.container').css('opacity', 0);
     });
+    hyperlapse.init();
   });

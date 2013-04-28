@@ -373,8 +373,8 @@ angular.module('clientApp')
         	$('#content').css('-webkit-filter', 'blur(10px)');
         }
 
-        // $scope.offer = true;
-        // $scope.$apply();
+         $scope.offer = true;
+        //$scope.$apply();
 
         $scope.agree = function() {
         	$scope.offer = false;
