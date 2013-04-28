@@ -61,7 +61,6 @@ angular.module('clientApp', [])
     });
     navigator.geolocation.getCurrentPosition( function(position){
       $rootScope.position = position;
-      console.log($rootScope.position);
       hyperlapse.init();
     }, alert );
   });
