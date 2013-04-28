@@ -43,9 +43,6 @@ angular.module('clientApp')
 
         function init() {
 
-
-        
-
           var M = new MersenneTwister();
 
           var game = {
