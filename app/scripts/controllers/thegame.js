@@ -27,7 +27,12 @@ this.loadBuffer(this.urlList[i],i);}
     var ctx = new webkitAudioContext();
     var darkgain = ctx.createGainNode();
     var darksounds = new BufferLoader(ctx, [
-      'audio/gore/160975__vosvoy__ragingzombie-feeding-loop.mp3'
+      'audio/gore/160975__vosvoy__ragingzombie-feeding-loop.mp3',
+      // 'audio/gore/132106__sironboy__woman-scream.mp3',
+      'audio/gore/35494__co3__horror-ambient-clean.mp3',
+      'audio/gore/49128__aesqe__monster-growl-02.mp3',
+      'audio/gore/104039__rutgermuller__scream-owowo-1.mp3',
+      'audio/gore/169813__missozzy__curse-02.mp3'
       ], function(list) {
         $.each(list, function(i, b) {
           var s = ctx.createBufferSource();
