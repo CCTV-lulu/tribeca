@@ -5,6 +5,7 @@ angular.module('clientApp')
 
         var moon, wolf, star, standing_wolf, grass_flat;
         var BONUS = 1000;
+        var $whip, $snowyhill;
 
         $(function() {
 
@@ -29,6 +30,9 @@ angular.module('clientApp')
           grass_flat = document.createElement('img');
           $(grass_flat).bind('load', _init);
           grass_flat.src = './images/grass_flat.png';
+
+          $whip = $('#whip');
+          $snowyhill = $('#snowyhill');
 
         });
 
@@ -96,6 +100,7 @@ angular.module('clientApp')
           hero.jump = function() {
             this.particle.velocity.y = - 20;
             if (game.started) {
+              $whip[0].play();
               updateScore();
             }
             return this;
@@ -393,6 +398,7 @@ angular.module('clientApp')
         	$scope.offer = true;
         	$scope.$apply();
         	$('#content').css('-webkit-filter', 'blur(10px)');
+        	$snowyhill[0].pause();
         }
 
         // $scope.offer = true;
@@ -407,5 +413,6 @@ angular.module('clientApp')
         	physics.play();
         	$scope.offer = false;
         	$('#content').css('-webkit-filter', 'none');
+        	$snowyhill[0].play();
         }
     });
