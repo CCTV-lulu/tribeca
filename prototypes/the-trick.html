@@ -218,10 +218,10 @@
 
           ground.constraint = ground.translation.y - (ground.depth + heroHeight) / 2;
 
-          var amount = 25;
+          var amount = 50;
           var summit = 0;
           var verticalIncrement = 150;
-          var jumps = window.jumps = _.map(_.range(amount), function(i) {
+          var jumps = _.map(_.range(amount), function(i) {
             return addJump(getHorizontal(), getVertical());
           });
 
@@ -318,7 +318,7 @@
             if (!_.isUndefined(isLeft)) {
               hero.reflectY = !isLeft;
             }
-            frame = (frame + 0.85) % frameCount;
+            frame = (frame + 0.5) % frameCount;
             updateFrame();
           }
 
@@ -332,7 +332,7 @@
           }
 
           function getVertical() {
-            summit -= verticalIncrement * M.random();
+            summit -= verticalIncrement * M.random() + verticalIncrement / 4;
             return summit;
           }
 
