@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('clientApp')
-  .controller('HappywolfyfuntimeandrainbowCtrl', function ($scope) {
+  .controller('HappywolfyfuntimeandrainbowCtrl', function ($scope, $location) {
  var moon, wolf, star;
 
         $(function() {
@@ -23,6 +23,7 @@ angular.module('clientApp')
         });
 
         var physics;
+        var offered = false;
 
         function init() {
 
@@ -339,8 +340,9 @@ angular.module('clientApp')
           function updateScore() {
           	var points = Math.round(parseInt(score.html()) + 10 * multiplier);
             score.html(points);
-            if (points > 100) {
+            if (!offered && points > 10) {
             	theoffer();
+            	offered = true;
             }
           }
 
@@ -364,6 +366,18 @@ angular.module('clientApp')
 
         function theoffer() {
         	physics.pause();
-        	console.log("offering");
+        	$scope.offer = true;
+        	$scope.$apply();
+        }
+
+        $scope.agree = function() {
+        	$scope.offer = false;
+        	$location.path("thegame")
+        }
+
+        $scope.disagree = function() {
+        	console.log("disagree");
+        	physics.play();
+        	$scope.offer = false;
         }
     });
