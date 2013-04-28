@@ -2,6 +2,16 @@
 
 angular.module('clientApp', [])
   .config(function ($routeProvider) {
+    var animatein = {
+      resolve: ['$q', '$timeout', function($q, $timeout) {
+        var d = $q.defer();
+        $timeout(function() {
+          d.resolve();
+          $('.container').css('opacity', 1);
+        }, 500);
+        return d.promise;
+      }]
+    };
     $routeProvider
       .when('/', {
         templateUrl: 'views/main.html',
@@ -25,9 +35,23 @@ angular.module('clientApp', [])
       })
       .when('/happywolfyfuntimeandrainbow', {
         templateUrl: 'views/happywolfyfuntimeandrainbow.html',
-        controller: 'HappywolfyfuntimeandrainbowCtrl'
+        controller: 'HappywolfyfuntimeandrainbowCtrl',
+        resolve: animatein
+      })
+      .when('/thegame', {
+        templateUrl: 'views/thegame.html',
+        controller: 'ThegameCtrl',
+        resolve: animatein
+      })
+      .when('/death', {
+        templateUrl: 'views/death.html',
+        controller: 'DeathCtrl'
       })
       .otherwise({
         redirectTo: '/'
       });
+  }).run(function($rootScope) {
+    $rootScope.$on('$routeChangeStart', function() {
+      $('.container').css('opacity', 0);
+    });
   });
