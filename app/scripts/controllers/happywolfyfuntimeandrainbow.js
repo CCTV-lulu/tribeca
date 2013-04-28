@@ -366,17 +366,19 @@ angular.module('clientApp')
 
         function theoffer() {
         	physics.pause();
+        	$('canvas').css('webkitFilter', "blur(3px) grayscale(70%) brightness(50%)");
         	$scope.offer = true;
         	$scope.$apply();
         }
 
         $scope.agree = function() {
         	$scope.offer = false;
-        	$location.path("thegame")
+        	$location.path("thegame");
         }
 
         $scope.disagree = function() {
         	console.log("disagree");
+        	$('canvas').css('webkitFilter', "");
         	physics.play();
         	$scope.offer = false;
         }
