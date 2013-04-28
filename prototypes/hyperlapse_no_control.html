@@ -3,18 +3,30 @@
 <head> 
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/> 
 	<title>Viewer Example</title> 
+  <style>
 
-	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places" type="text/javascript">
-	</script> 
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+  </style>
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places" type="text/javascript"></script> 
 	<script src="third-party/dat.gui.min.js"></script>
 	<script src="third-party/three.min.js"></script>
 	<script src="third-party/GSVPano.js"></script>
 	<script src="third-party/Hyperlapse.js"></script>
+	<script src="third-party/underscore.js"></script>
 	<script> 
 	
 		var start_point, end_point, lookat_point;
 
 		var ma, directions_service, streetview_service;
+		var cancelTimer = false;
 
 		function getLocation() {
 			navigator.geolocation.getCurrentPosition( getDestination, alert );
@@ -94,7 +106,7 @@
 			var pano = document.getElementById('pano');
 			var is_moving = false;
 			var px, py;
-			var onPointerDownPointerX=0, onPointerDownPointerY=0;
+			var onPointerDownPointerX = 0, onPointerDownPointerY = 0;
 
 			var hyperlapse = new Hyperlapse(pano, {
 				lookat: lookat_point,
@@ -105,7 +117,7 @@
 				zoom: 2,
 				use_lookat: false,
 				distance_between_points: 2,
-				max_points: 100,
+				max_points: 5,
 				material: material
 			});
 			
@@ -119,7 +131,7 @@
 			};
 
 			hyperlapse.onLoadComplete = function(e) {
-					hyperlapse.play();
+          // hyperlapse.play();
 			};
 
 			hyperlapse.onFrame = function(e) {
@@ -129,6 +141,15 @@
 			};
 
 			pano.addEventListener( 'mousedown', function(e){
+
+        /**
+         * New Controls
+         */
+
+        initializeTimer();
+
+        return;
+
 				e.preventDefault();
 
 				is_moving = true;
@@ -142,10 +163,17 @@
 			}, false );
 
 			pano.addEventListener( 'mousemove', function(e){
+
+        /**
+         * New Controls
+         */
+
+        return;
+
 				e.preventDefault();
 				var f = hyperlapse.fov() / 500;
 
-				if ( is_moving ) {
+        if ( is_moving ) {
 					var dx = ( onPointerDownPointerX - e.clientX ) * f;
 					var dy = ( e.clientY - onPointerDownPointerY ) * f;
 					hyperlapse.position.x = px + dx; // reversed dragging direction (thanks @mrdoob!)
@@ -153,16 +181,23 @@
 
 					o.position_x = hyperlapse.position.x;
 					o.position_y = hyperlapse.position.y;
-				}
+        }
 			}, false );
 
 			pano.addEventListener( 'mouseup', function(){
+
+        /**
+         * New Controls
+         */
+
+        cancelTimer = true;
+
+        return;
+
 				is_moving = false;
 				// hyperlapse.position.x = px;
 				// hyperlapse.position.y = py;
 			}, false );
-
-			
 
 			/* Dat GUI */
 
@@ -224,6 +259,9 @@
 			play_controls.add(hyperlapse, 'prev');
 			play_controls.open();
 
+      // gui.hide();
+      gui.domElement.style.display = 'none';
+
 			window.addEventListener('resize', function(){
 				hyperlapse.setSize(window.innerWidth, window.innerHeight);
 				o.screen_width = window.innerWidth;
@@ -246,6 +284,29 @@
 			};
 
 			o.generate();
+
+      function initializeTimer() {
+        accelerate();
+        cancelTimer = false;
+      }
+
+      function accelerate() {
+
+        if (!hyperlapse) {
+          return;
+        }
+
+        hyperlapse.next();
+
+        if (!cancelTimer) {
+          _.delay(requestAnimationFrame, getTimeout(accelAmount), accelerate);
+        }
+      }
+
+      function getTimeout(accelAmount) {
+        
+      }
+
 		}
 
 		window.onload = function() {

@@ -4,17 +4,56 @@
     <meta charset="utf-8">
     <title>Death Curse</title>
     <style>
+
+      @font-face {
+          font-family: 'populaireregular';
+          src: url('fonts/populaire-webfont.eot');
+          src: url('fonts/populaire-webfont.eot?#iefix') format('embedded-opentype'),
+               url('fonts/populaire-webfont.woff') format('woff'),
+               url('fonts/populaire-webfont.ttf') format('truetype'),
+               url('fonts/populaire-webfont.svg#populaireregular') format('svg');
+          font-weight: normal;
+          font-style: normal;
+      }
+
       * {
         margin: 0;
         padding: 0;
       }
+      body {
+        font-family: 'populaireregular';
+        font-size: 30px;
+        background: #111;
+        color: #fff;
+      }
       #content {
-        position: relative;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-top: -250px;
+        margin-left: -400px;
         display: none;
         width: 800px;
         height: 500px;
-        margin: 0 auto;
         overflow: hidden;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        background: #6932ff; /* Old browsers */
+        background: -moz-linear-gradient(top, #6932ff 0%, #815dad 100%); /* FF3.6+ */
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#6932ff), color-stop(100%,#815dad)); /* Chrome,Safari4+ */
+        background: -webkit-linear-gradient(top, #6932ff 0%,#815dad 100%); /* Chrome10+,Safari5.1+ */
+        background: -o-linear-gradient(top, #6932ff 0%,#815dad 100%); /* Opera 11.10+ */
+        background: -ms-linear-gradient(top, #6932ff 0%,#815dad 100%); /* IE10+ */
+        background: linear-gradient(to bottom, #6932ff 0%,#815dad 100%); /* W3C */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6932ff', endColorstr='#815dad',GradientType=0 ); /* IE6-9 */
+      }
+      #content .wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url(./images/bg.png) center center;
       }
       #score {
         position: absolute;
@@ -22,10 +61,12 @@
         left: 0;
         z-index: 9999;
         width: 100%;
+        padding: 20px;
       }
       #stats {
         position: absolute;
         display: none;
+/*        display: block;*/
         top: 0;
         left: 0;
         width: 100%;
@@ -33,15 +74,53 @@
         background: rgba(0, 0, 0, 0.66);
         z-index: 9999;
       }
+      #stats > div {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        text-align: center;
+        width: 250px;
+        height: 150px;
+        margin-left: -125px;
+        margin-top: -101px;
+        padding: 25px 0;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+/*        box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);*/
+        background: rgba(0, 0, 0, 0.5);
+      }
+      button {
+        border: 0;
+        background: transparent;
+        text-decoration: underline;
+        font-family: 'populaireregular';
+        font-size: 30px;
+        cursor: pointer;
+        color: #fff;
+      }
+      button:hover {
+        text-decoration: none;
+      }
+      .score:before {
+        content: "Your Score: ";
+      }
+      .highscore:before {
+        content: "Previous High Score: ";
+      }
+      .scripts {
+        display: none;
+      }
     </style>
   </head>
   <body>
     <div id="content">
+      <div class="wrapper"></div>
       <div id="score">0</div>
       <div id="stats">
         <div>
           <div class="highscore"></div>
           <div class="score"></div>
+          <br />
           <button>Play Again</button>
         </div>
       </div>
@@ -54,7 +133,27 @@
       <script src="./third-party/mersenne-twister.js"></script>
       <script>
 
+        var moon, wolf, star;
+
         $(function() {
+
+          var _init = _.after(3, init);
+
+          moon = document.createElement('img');
+          $(moon).bind('load', _init);
+          moon.src = './images/moon.png';
+
+          star = document.createElement('img');
+          $(star).bind('load', _init);
+          star.src = './images/star.png';
+
+          wolf = document.createElement('img');
+          $(wolf).bind('load', _init);
+          wolf.src = './images/wolf.png';
+
+        });
+
+        function init() {
 
           var M = new MersenneTwister();
 
@@ -72,7 +171,7 @@
             width: 800,
             height: 500,
             type: Two.Types.canvas
-          }).appendTo($('#content')[0]);
+          }).appendTo($('#content .wrapper')[0]);
           var gravity = 0.75;
           var physics = new Physics(gravity);
 
@@ -82,29 +181,47 @@
           var ground = two.makeRectangle(two.width / 2, two.height - 5, two.width, groundDepth);
           ground.depth = groundDepth;
           ground.noStroke();
-          ground.fill = 'brown';
+          ground.fill = '#5faf7c';
 
-          var heroHeight = 20;
+          var heroHeight = 60;
           var hero = two.makeRectangle(two.width / 2, two.height, heroHeight, heroHeight);
-          hero.height = heroHeight;
           hero.particle = physics.makeParticle(1.0, two.width / 2, two.height / 2);
           hero.particle.position = hero.translation;
           hero.noStroke().fill = 'black';
           hero.destination = new Two.Vector();
+
+          var dDiff = 74;
+          var nDiff = 30;
+          var frame = 1;
+          var frameCount = 12;
+
+          hero.image = wolf;
+          hero.width = 0;
+          hero.height = 0;
+
+          hero.dwidth = 100;
+          hero.dheight = 60;
+
+          hero.nx = 50;
+          hero.ny = 0;
+
+          hero.nwidth = 100;
+          hero.nheight = 60;
+
           hero.jump = function() {
-            this.particle.velocity.y = - heroHeight;
+            this.particle.velocity.y = - 20;
             if (game.started) {
-              score.html(Math.round(parseInt(score.html()) + 10 * multiplier));
+              updateScore();
             }
             return this;
           };
 
-          ground.constraint = ground.translation.y - (ground.depth + hero.height) / 2;
+          ground.constraint = ground.translation.y - (ground.depth + heroHeight) / 2;
 
-          var amount = 25;
+          var amount = 50;
           var summit = 0;
-          var verticalIncrement = 250;
-          var jumps = window.jumps = _.map(_.range(amount), function(i) {
+          var verticalIncrement = 150;
+          var jumps = _.map(_.range(amount), function(i) {
             return addJump(getHorizontal(), getVertical());
           });
 
@@ -134,8 +251,32 @@
               var particle = hero.particle;
               var position = particle.position;
 
+              var delta = hero.destination.x - position.x;
+              var isLeft;
+
+              if (delta < 0) {
+                isLeft = false;
+              } else if (delta > 0) {
+                isLeft = true;
+              }
+
+              var step = 12;
+
               position.y = Math.min(ground.constraint, position.y);
+              // if (Math.abs(delta) <= step) {
+              //   position.x = hero.destination.x;
+              // } else if (delta < step) {
+              //   position.x -= 7;
+              // } else if (delta > step) {
+              //   position.x += step;
+              // }
               position.x += (hero.destination.x - position.x) * 0.125;
+
+              if (Math.abs(delta) > 0.1) {
+                run(isLeft);
+              } else {
+                stand();
+              }
 
               _.each(jumps, function(jump, i) {
                 var dead = jump.update();
@@ -167,24 +308,47 @@
             $('#content').fadeIn();
           });
 
+          function stand() {
+            frame = 0;
+            updateFrame();
+          }
+
+          function run(isLeft) {
+            // Flip the stance
+            if (!_.isUndefined(isLeft)) {
+              hero.reflectY = !isLeft;
+            }
+            frame = (frame + 0.5) % frameCount;
+            updateFrame();
+          }
+
+          function updateFrame() {
+            hero.height = - dDiff * Math.floor(frame);
+            hero.ny = nDiff;
+          }
+
           function getHorizontal() {
             return two.width / 2 - (M.random() * two.width * 0.66 - two.width * 0.33);
           }
 
           function getVertical() {
-            summit -= verticalIncrement * M.random();
+            summit -= verticalIncrement * M.random() + verticalIncrement / 4;
             return summit;
           }
 
           function circleOfLife(i) {
             var x = getHorizontal();
             var y = getVertical();
+            jumps[i].visible = false;
             jumps[i].translation.set(x, y);
+            _.defer(function() {
+              jumps[i].visible = true;
+            });
           }
 
           function addJump(x, y, r) {
 
-            var color = 'lightblue';
+            var color = 'white';
             var radius = r || 50;
             var diameter = radius * 2;
             var offset = diameter * 1.5;
@@ -192,14 +356,19 @@
 
             var circle = two.makeCircle(x, y, radius);
             circle.noStroke().fill = color;
+            circle.image = moon;
+            circle.width = 50;
+            circle.height = 50;
 
             var amount = 8;
             var particles = _.map(_.range(amount), function(i) {
-              
               var particle = two.makeCircle(0, 0, radius / (amount / 2));
               particle.visible = false;
               particle.noStroke().fill = color;
               particle.origin = new Two.Vector(x, y);
+              particle.image = star;
+              particle.width = 12;
+              particle.height = 12;
               return particle;
             });
 
@@ -222,12 +391,16 @@
                   var y = amplitude * Math.sin(theta) + p.origin.y;
                   p.translation.set(x, y);
                   p.opacity = 1 - (k * t) / (k - t + 1);
+                  p.rotation = theta + Math.PI / 2;
                 });
               })
               .onComplete(function() {
                 _.each(particles, function(p) {
-                  p.translation.clear();
                   p.visible = false;
+                  p.opacity = 0.0;
+                  _.defer(function() {
+                    p.translation.clear();
+                  });
                 });
                 callback();
               })
@@ -292,6 +465,10 @@
             });
           }
 
+          function updateScore() {
+            score.html(Math.round(parseInt(score.html()) + 10 * multiplier));
+          }
+
           function endGame() {
             game.highscore = Math.max(game.highscore, parseInt(score.html()));
             var $stats = $('#stats');
@@ -301,7 +478,14 @@
             game.ended = true;
           }
 
-        });
+        }
+
+        function mod(v, limit) {
+          while (v < 0) {
+            v += limit;
+          }
+          return v % limit;
+        }
 
       </script>
     </div>
