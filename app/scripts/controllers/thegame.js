@@ -40,7 +40,7 @@ this.loadBuffer(this.urlList[i],i);}
           s.connect(darkgain);
           s.noteOn(0);
         });
-        darkgain.gain.value = 0.3;
+        darkgain.gain.value = 0.1;
         darkgain.connect(ctx.destination);
       });
     darksounds.load();
@@ -212,7 +212,7 @@ this.loadBuffer(this.urlList[i],i);}
         if ($rootScope.CINEMATIC == false) {
           var l = $rootScope.progress;
           var d = $rootScope.darkness;
-              
+
           if (lightorder.length > 0 && l >= lightorder[0]) {
               var ll = lightorder.shift();
               $rootScope.CINEMATIC = true;
@@ -230,7 +230,7 @@ this.loadBuffer(this.urlList[i],i);}
         }
 
         if ($rootScope.CINEMATIC) {
-          darkgain.gain.value = 0.3;
+          darkgain.gain.value = 0.1;
         }
 
 
