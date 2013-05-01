@@ -1,0 +1,152 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <link rel="stylesheet" href="styles/bea551d8.main.css">
+  </head>
+  <body ng-app="clientApp">
+    <!--[if lt IE 7]>
+      <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+    <![endif]-->
+
+    <!--[if lt IE 9]>
+      <script src="components/es5-shim/es5-shim.js"></script>
+      <script src="components/json3/lib/json3.min.js"></script>
+    <![endif]-->
+
+    <!-- Add your site or application content here -->
+    <div class="container" ng-view=""></div>
+
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places" type="text/javascript"></script> 
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular-resource.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular-cookies.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular-sanitize.min.js"></script>
+    <script src="components/jquery/jquery.js"></script>
+
+    <script src="scripts/e975bd9e.scripts.js"></script>
+
+    <script id="vertexShader" type="x-shader/x-vertex">
+
+      varying vec2 vUv;
+      varying vec3 vNormal;
+
+      void main() {
+
+        vUv = uv;
+        vNormal = normal.xyz;
+        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+        gl_Position = projectionMatrix * mvPosition;
+
+      }
+
+    </script>
+
+    <script id="fragmentShader" type="x-shader/x-fragment">
+
+      precision highp float;
+
+      varying vec2 vUv;
+      varying vec3 vNormal;
+      uniform sampler2D map;
+      uniform sampler2D LUT;
+      uniform float time;
+      uniform float darkness;
+      uniform float lightness;
+
+      vec3 ColorLookupTable(vec3 InLDRColor)
+      {
+            // requires a volume texture 16x16x16 unwrapped in a 2d texture 256x16
+            // can be optimized by using a volume texture
+            vec2 Offset = vec2(0.5 / 256.0, 0.5 / 16.0);
+            float Scale = 15.0 / 16.0;
+
+            // Also consider blur value in the blur buffer written by translucency
+            float IntB = floor(InLDRColor.b * 14.9999) / 16.0;
+            float FracB = InLDRColor.b * 15.0 - IntB * 16.0;
+
+            float U = IntB + InLDRColor.r * Scale / 16.0;
+            float V = InLDRColor.g * Scale;
+
+            vec3 RG0 = texture2D(LUT, Offset + vec2(U             , 1.0-V)).rgb;
+            vec3 RG1 = texture2D(LUT, Offset + vec2(U + 1.0 / 16.0, 1.0-V)).rgb;
+
+            RG0 = pow(RG0, vec3(0.9));
+            RG1 = pow(RG1, vec3(0.9));
+
+            return mix(RG0, RG1, FracB);
+      }
+
+      float rand(vec3 co){
+          return fract(sin(dot(co.xyz ,vec3(12.9898,78.233+time,44.937))) * 43758.5453);
+      }
+
+      float rand2(vec2 co, float freq) {
+        return sin(time*freq+dot(co.xy/freq*5. ,vec2(12.9898,78.233)));
+      }
+
+      void main() {
+
+        float light = max((vNormal.x-1.0+lightness)*(4.*lightness),0.);
+        float dark = max((-vNormal.x-1.0+darkness)*(4.*darkness),0.);
+
+        float r = rand2(vNormal.xy, 10.);
+        float r2 = rand2(vNormal.yz, 10.);
+        vec2 randUv = vec2( r*0.02, r2*0.02 );
+        randUv *= vec2(dark);
+
+        vec3 tex = texture2D( map, vUv + randUv ).xyz;
+        tex = ColorLookupTable(tex);
+
+        tex = tex+light-dark;
+
+        gl_FragColor = vec4(tex+vec3(rand(vNormal)*0.15), 1.0);
+
+      }
+
+    </script>
+
+    <div id="pano" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index:-1"></div> 
+    <audio id="feeding-loop" src="audio/gore/160975__vosvoy__ragingzombie-feeding-loop.mp3"></audio>
+    <audio id="story-0" src="audio/00-offer-intro.mp3"></audio>
+    <audio id="story-1" src="audio/01-offer-accepted.mp3"></audio>
+    <audio id="story-2" src="audio/02-light-run-prompt.mp3"></audio>
+    <audio id="story-3" src="audio/02a-light-run.mp3"></audio>
+    <audio id="story-4" src="audio/03-.mp3"></audio>
+    <audio id="story-5" src="audio/04-.mp3"></audio>
+    <audio id="story-6" src="audio/05-.mp3"></audio>
+    <audio id="story-7" src="audio/06-.mp3"></audio>
+    <audio id="story-8" src="audio/07-.mp3"></audio>
+    <audio id="story-9" src="audio/08-.mp3"></audio>
+    <audio id="story-10" src="audio/09-.mp3"></audio>
+    <audio id="story-11" src="audio/10-.mp3"></audio>
+    <audio id="story-12" src="audio/11-.mp3"></audio>
+    <audio id="story-13" src="audio/12-.mp3"></audio>
+    <audio id="story-14" src="audio/13-.mp3"></audio>
+    <audio id="story-15" src="audio/14-.mp3"></audio>
+    <audio id="story-16" src="audio/15-.mp3"></audio>
+    <audio id="story-17" src="audio/16-.mp3"></audio>
+    <audio id="story-18" src="audio/17-.mp3"></audio>
+    <audio id="story-19" src="audio/18-.mp3"></audio>
+    <audio id="story-20" src="audio/19-.mp3"></audio>
+    <audio id="story-21" src="audio/20-.mp3"></audio>
+    <audio id="story-22" src="audio/21-.mp3"></audio>
+    <audio id="story-23" src="audio/22-.mp3"></audio>
+
+    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+    <script>
+      var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
+      (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+      g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+      s.parentNode.insertBefore(g,s)}(document,'script'));
+    </script>
+  </body>
+</html>
