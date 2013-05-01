@@ -10,21 +10,6 @@ angular.module('clientApp')
   		],
 
   		init: function() {
-  			app.webfontInit();
-  		},
-
-  		webfontInit: function() {
-  			window.WebFontConfig = { fontdeck: { id: '32303' } };
-
-  			(function() {
-  			  var wf = document.createElement('script');
-  			  wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
-  			  '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
-  			  wf.type = 'text/javascript';
-  			  wf.async = 'true';
-  			  var s = document.getElementsByTagName('script')[0];
-  			  s.parentNode.insertBefore(wf, s);
-  			})();
   		},
 
   	    spookify: function(el) {
