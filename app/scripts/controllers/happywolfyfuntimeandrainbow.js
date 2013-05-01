@@ -33,11 +33,11 @@ angular.module('clientApp')
 
           front_forest = document.createElement('img');
           $(front_forest).bind('load', _init);
-          front_forest.src = '/images/front_trees.png';
+          front_forest.src = './images/front_trees.png';
 
           back_forest = document.createElement('img');
           $(back_forest).bind('load', _init);
-          back_forest.src = '/images/back_trees.png';
+          back_forest.src = './images/back_trees.png';
 
           $whip = $('#whip');
           $snowyhill = $('#snowyhill');
